@@ -1,255 +1,506 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>GridWatch — City</title>
-  <meta name="description" content="City-specific dashboard for GridWatch with map, incidents, and subsystem panels." />
-  <style>
-    :root{
-      --bg: #0f1220; --panel:#171a2b; --panel-2:#1f2340; --border:#2a2f55; --muted:#9aa3b2; --text:#e8ebf4;
-      --accent:#7aa8ff; --accent-2:#4ce1b6; --radius:14px; --shadow:0 8px 30px rgba(0,0,0,.35);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial; background: radial-gradient(1200px 600px at 10% -10%, #1a1f3d, transparent), var(--bg); color:var(--text)}
-    .wrap{max-width:1200px; margin:0 auto; padding:24px 20px 48px}
-    header{display:flex; align-items:center; justify-content:space-between; gap:16px; margin:8px 0 18px}
-    .brand{display:flex; align-items:center; gap:12px}
-    .logo{ width:40px; height:40px; border-radius:10px; background:linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow:var(--shadow); display:grid; place-items:center; font-weight:800; color:#0b1020 }
-    h1{margin:0; font-size: clamp(22px, 3vw, 32px); letter-spacing:.2px}
-    .sub{color:var(--muted); font-size:13px}
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>GridWatch — City</title>
+    <meta
+      name="description"
+      content="City-specific dashboard for GridWatch with map, incidents, and subsystem panels."
+    />
+    <style>
+      :root {
+        --bg: #0f1220;
+        --panel: #171a2b;
+        --panel-2: #1f2340;
+        --border: #2a2f55;
+        --muted: #9aa3b2;
+        --text: #e8ebf4;
+        --accent: #7aa8ff;
+        --accent-2: #4ce1b6;
+        --radius: 14px;
+        --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
+          "Helvetica Neue", Arial;
+        background: radial-gradient(
+            1200px 600px at 10% -10%,
+            #1a1f3d,
+            transparent
+          ),
+          var(--bg);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 24px 20px 48px;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin: 8px 0 18px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        box-shadow: var(--shadow);
+        display: grid;
+        place-items: center;
+        font-weight: 800;
+        color: #0b1020;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(22px, 3vw, 32px);
+        letter-spacing: 0.2px;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 13px;
+      }
 
-    .btn{ display:inline-flex; align-items:center; gap:8px; border:none; cursor:pointer; padding:8px 14px; border-radius:999px; font-weight:600; background: linear-gradient(135deg, var(--accent), var(--accent-2)); color:#0b1020; box-shadow: var(--shadow); text-decoration:none }
-    .btn.secondary{ background:#0f1430; color:var(--text); border:1px solid var(--border) }
-    .btn:focus{ outline:none; box-shadow: 0 0 0 3px rgba(122,168,255,.35); }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        cursor: pointer;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #0b1020;
+        box-shadow: var(--shadow);
+        text-decoration: none;
+      }
+      .btn.secondary {
+        background: #0f1430;
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(122, 168, 255, 0.35);
+      }
 
-    main{ display:grid; grid-template-columns: 2fr 1fr; gap:22px }
-    @media (max-width: 980px){ main{ grid-template-columns: 1fr; } }
+      main {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 22px;
+      }
+      @media (max-width: 980px) {
+        main {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    .panel{ background: linear-gradient(180deg, var(--panel), var(--panel-2)); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow) }
-    .card{ background:#0d1022; border:1px solid var(--border); border-radius:12px; padding:14px }
-    .panel h2{ margin:0; padding:14px 16px; font-size:18px }
+      .panel {
+        background: linear-gradient(180deg, var(--panel), var(--panel-2));
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+      .card {
+        background: #0d1022;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 14px;
+      }
+      .panel h2 {
+        margin: 0;
+        padding: 14px 16px;
+        font-size: 18px;
+      }
 
-    .grid{ display:grid; gap:14px }
-    .metrics{ display:grid; grid-template-columns: repeat(3,1fr); gap:12px }
-    @media (max-width:700px){ .metrics{ grid-template-columns: 1fr 1fr; } }
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+      @media (max-width: 700px) {
+        .metrics {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
 
-    .stat{ background:#0d1022; border:1px solid var(--border); border-radius:12px; padding:12px }
-    .stat .k{ font-size:22px; font-weight:700 }
-    .stat .t{ color:var(--muted); font-size:12px }
+      .stat {
+        background: #0d1022;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+      }
+      .stat .k {
+        font-size: 22px;
+        font-weight: 700;
+      }
+      .stat .t {
+        color: var(--muted);
+        font-size: 12px;
+      }
 
-    #map{ height:420px; border-radius:12px; }
+      #map {
+        height: 420px;
+        border-radius: 12px;
+      }
 
-    ul.clean{ list-style: none; padding:0; margin:0 }
-    ul.clean li{ border-bottom:1px solid #181c36; padding:10px 2px; display:flex; justify-content:space-between; align-items:center; gap:12px }
-    ul.clean li:last-child{ border-bottom:none }
+      ul.clean {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      ul.clean li {
+        border-bottom: 1px solid #181c36;
+        padding: 10px 2px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+      }
+      ul.clean li:last-child {
+        border-bottom: none;
+      }
 
-    .badge{ display:inline-flex; align-items:center; gap:6px; background:#0f1430; border:1px solid var(--border); padding:4px 10px; border-radius:999px; font-size:12px; color:var(--muted) }
-    .sev-hi{ background:rgba(255,88,88,.1); border-color:#6b1a1a; color:#ff8f8f }
-    .sev-med{ background:rgba(255,200,88,.08); border-color:#5b481a; color:#ffd890 }
-    .sev-low{ background:rgba(100,240,180,.08); border-color:#2a5b4a; color:#9bf3cf }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #0f1430;
+        border: 1px solid var(--border);
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .sev-hi {
+        background: rgba(255, 88, 88, 0.1);
+        border-color: #6b1a1a;
+        color: #ff8f8f;
+      }
+      .sev-med {
+        background: rgba(255, 200, 88, 0.08);
+        border-color: #5b481a;
+        color: #ffd890;
+      }
+      .sev-low {
+        background: rgba(100, 240, 180, 0.08);
+        border-color: #2a5b4a;
+        color: #9bf3cf;
+      }
 
-    .muted{ color:var(--muted) }
-  </style>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-o9N1j7kGStb0rJ7gGgZrA3J2KXkS2aR4YwE6vE1l24k=" crossorigin>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44c=" crossorigin></script>
-</head>
-<body>
-  <div class="wrap">
-    <header>
-      <div class="brand">
-        <div class="logo">GW</div>
-        <div>
-          <h1 id="cityName">GridWatch</h1>
-          <div class="sub" id="subhead">Live dashboard</div>
-        </div>
-      </div>
-      <div style="display:flex; gap:8px; align-items:center">
-        <a href="index.html" class="btn secondary" id="backBtn">← Back</a>
-        <button class="btn" id="printBtn">Print report</button>
-      </div>
-    </header>
-
-    <main>
-      <!-- Left: Map + Incidents -->
-      <section class="panel" aria-labelledby="mapHdr">
-        <h2 id="mapHdr">Map</h2>
-        <div class="grid" style="padding: 0 14px 14px;">
-          <div id="map" class="card"></div>
-
-          <div class="metrics">
-            <div class="stat"><div class="k" id="m-outages">0</div><div class="t">Active utility outages</div></div>
-            <div class="stat"><div class="k" id="m-incidents">0</div><div class="t">Incidents today</div></div>
-            <div class="stat"><div class="k" id="m-avgEta">–</div><div class="t">Avg. ETA to resolve</div></div>
+      .muted {
+        color: var(--muted);
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-o9N1j7kGStb0rJ7gGgZrA3J2KXkS2aR4YwE6vE1l24k="
+      crossorigin
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44c="
+      crossorigin
+    ></script>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="brand">
+          <div class="logo">GW</div>
+          <div>
+            <h1 id="cityName">GridWatch</h1>
+            <div class="sub" id="subhead">Live dashboard</div>
           </div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center">
+          <a href="index.html" class="btn secondary" id="backBtn">← Back</a>
+          <button class="btn" id="printBtn">Print report</button>
+        </div>
+      </header>
 
-          <div class="card" id="incidentsCard">
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px">
-              <h3 style="margin:0">Incidents</h3>
-              <span class="badge" id="incidentsBadge">0 open</span>
+      <main>
+        <!-- Left: Map + Incidents -->
+        <section class="panel" aria-labelledby="mapHdr">
+          <h2 id="mapHdr">Map</h2>
+          <div class="grid" style="padding: 0 14px 14px">
+            <div id="map" class="card"></div>
+
+            <div class="metrics">
+              <div class="stat">
+                <div class="k" id="m-outages">0</div>
+                <div class="t">Active utility outages</div>
+              </div>
+              <div class="stat">
+                <div class="k" id="m-incidents">0</div>
+                <div class="t">Incidents today</div>
+              </div>
+              <div class="stat">
+                <div class="k" id="m-avgEta">–</div>
+                <div class="t">Avg. ETA to resolve</div>
+              </div>
             </div>
-            <ul class="clean" id="incidentsList"></ul>
-            <div class="muted" id="incidentsEmpty">No incidents yet.</div>
+
+            <div class="card" id="incidentsCard">
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: space-between;
+                  margin-bottom: 8px;
+                "
+              >
+                <h3 style="margin: 0">Incidents</h3>
+                <span class="badge" id="incidentsBadge">0 open</span>
+              </div>
+              <ul class="clean" id="incidentsList"></ul>
+              <div class="muted" id="incidentsEmpty">No incidents yet.</div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Right: Subsystems -->
-      <aside class="panel" aria-labelledby="sysHdr">
-        <h2 id="sysHdr">Subsystems</h2>
-        <div class="grid" style="padding: 0 14px 14px;">
-          <div class="card" id="utilities">
-            <h3 style="margin:0 0 8px">Utilities</h3>
-            <ul class="clean" id="utilList"></ul>
+        <!-- Right: Subsystems -->
+        <aside class="panel" aria-labelledby="sysHdr">
+          <h2 id="sysHdr">Subsystems</h2>
+          <div class="grid" style="padding: 0 14px 14px">
+            <div class="card" id="utilities">
+              <h3 style="margin: 0 0 8px">Utilities</h3>
+              <ul class="clean" id="utilList"></ul>
+            </div>
+
+            <div class="card" id="traffic">
+              <h3 style="margin: 0 0 8px">Traffic</h3>
+              <ul class="clean" id="trafficList"></ul>
+            </div>
+
+            <div class="card" id="water">
+              <h3 style="margin: 0 0 8px">Water Quality</h3>
+              <ul class="clean" id="waterList"></ul>
+            </div>
+
+            <div class="card" id="citizen">
+              <h3 style="margin: 0 0 8px">Citizen Reports</h3>
+              <ul class="clean" id="citizenList"></ul>
+            </div>
           </div>
+        </aside>
+      </main>
+    </div>
 
-          <div class="card" id="traffic">
-            <h3 style="margin:0 0 8px">Traffic</h3>
-            <ul class="clean" id="trafficList"></ul>
-          </div>
+    <script>
+      // ===== Helpers =====
+      const $ = (sel, root = document) => root.querySelector(sel);
+      const params = new URLSearchParams(location.search);
+      const cityName =
+        decodeURIComponent(params.get("name") || "").trim() || "Unknown City";
 
-          <div class="card" id="water">
-            <h3 style="margin:0 0 8px">Water Quality</h3>
-            <ul class="clean" id="waterList"></ul>
-          </div>
+      const KNOWN = {
+        "New York, NY": [40.7128, -74.006],
+        "Los Angeles, CA": [34.0522, -118.2437],
+        "Chicago, IL": [41.8781, -87.6298],
+        "Houston, TX": [29.7604, -95.3698],
+        "Phoenix, AZ": [33.4484, -112.074],
+        "San Francisco, CA": [37.7749, -122.4194],
+        "Seattle, WA": [47.6062, -122.3321],
+        "Denver, CO": [39.7392, -104.9903],
+        "Boston, MA": [42.3601, -71.0589],
+        "Austin, TX": [30.2672, -97.7431],
+        "Miami, FL": [25.7617, -80.1918],
+        "Dallas, TX": [32.7767, -96.797],
+        "Washington, DC": [38.9072, -77.0369],
+        "Atlanta, GA": [33.749, -84.388],
+        "Colorado Springs, CO": [38.8339, -104.8214],
+      };
 
-          <div class="card" id="citizen">
-            <h3 style="margin:0 0 8px">Citizen Reports</h3>
-            <ul class="clean" id="citizenList"></ul>
-          </div>
-        </div>
-      </aside>
-    </main>
-  </div>
+      document.title = `${cityName} — GridWatch`;
+      $("#cityName").textContent = cityName;
+      $(
+        "#subhead"
+      ).textContent = `Live dashboard • ${new Date().toLocaleString()}`;
 
-  <script>
-    // ===== Helpers =====
-    const $ = (sel, root=document) => root.querySelector(sel);
-    const params = new URLSearchParams(location.search);
-    const cityName = decodeURIComponent(params.get('name') || '').trim() || 'Unknown City';
+      // ===== Map =====
+      async function geocodeCity(name) {
+        const key = "gw:geo:" + name;
+        try {
+          const cached = localStorage.getItem(key);
+          if (cached) return JSON.parse(cached);
+        } catch {}
+        if (KNOWN[name]) {
+          const o = { lat: KNOWN[name][0], lon: KNOWN[name][1], name };
+          localStorage.setItem(key, JSON.stringify(o));
+          return o;
+        }
+        try {
+          const url =
+            "https://nominatim.openstreetmap.org/search?format=json&limit=1&q=" +
+            encodeURIComponent(name);
+          const res = await fetch(url, {
+            headers: { "Accept-Language": "en" },
+          });
+          const [hit] = res.ok ? await res.json() : [];
+          if (hit) {
+            const o = {
+              lat: parseFloat(hit.lat),
+              lon: parseFloat(hit.lon),
+              name,
+            };
+            localStorage.setItem(key, JSON.stringify(o));
+            return o;
+          }
+        } catch {}
+        return { lat: 39.5, lon: -98.35, name: "United States" };
+      }
 
-    const KNOWN = {
-      "New York, NY": [40.7128,-74.0060],
-      "Los Angeles, CA": [34.0522,-118.2437],
-      "Chicago, IL": [41.8781,-87.6298],
-      "Houston, TX": [29.7604,-95.3698],
-      "Phoenix, AZ": [33.4484,-112.0740],
-      "San Francisco, CA": [37.7749,-122.4194],
-      "Seattle, WA": [47.6062,-122.3321],
-      "Denver, CO": [39.7392,-104.9903],
-      "Boston, MA": [42.3601,-71.0589],
-      "Austin, TX": [30.2672,-97.7431],
-      "Miami, FL": [25.7617,-80.1918],
-      "Dallas, TX": [32.7767,-96.7970],
-      "Washington, DC": [38.9072,-77.0369],
-      "Atlanta, GA": [33.7490,-84.3880],
-      "Colorado Springs, CO": [38.8339,-104.8214]
-    };
+      let map, marker;
+      async function initMap() {
+        const geo = await geocodeCity(cityName);
+        const center = [geo.lat, geo.lon];
+        map = L.map("map").setView(center, 11);
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          maxZoom: 19,
+          attribution: "&copy; OpenStreetMap",
+        }).addTo(map);
+        marker = L.marker(center).addTo(map).bindPopup(cityName).openPopup();
+        setTimeout(() => map?.invalidateSize(), 50);
+      }
 
-    document.title = `${cityName} — GridWatch`;
-    $('#cityName').textContent = cityName;
-    $('#subhead').textContent = `Live dashboard • ${new Date().toLocaleString()}`;
+      // ===== Fake data (replace with agents / backend) =====
+      function fakeIncidents() {
+        const pool = [
+          { t: "Power outage", sev: "hi", where: "Downtown", eta: "2h" },
+          {
+            t: "Traffic collision",
+            sev: "med",
+            where: "I-7 W ramp",
+            eta: "45m",
+          },
+          {
+            t: "Water service disruption",
+            sev: "med",
+            where: "Uptown",
+            eta: "3h",
+          },
+          {
+            t: "Fiber cut (ISP)",
+            sev: "hi",
+            where: "Tech District",
+            eta: "4h",
+          },
+          { t: "Minor flooding", sev: "low", where: "Riverside", eta: "6h" },
+        ];
+        // Pick 2–5 at random
+        const n = Math.floor(Math.random() * 4) + 2;
+        return Array.from(
+          { length: n },
+          (_, i) =>
+            pool[(i + Math.floor(Math.random() * pool.length)) % pool.length]
+        );
+      }
 
-    // ===== Map =====
-    async function geocodeCity(name){
-      const key = 'gw:geo:'+name;
-      try{ const cached = localStorage.getItem(key); if(cached) return JSON.parse(cached); }catch{}
-      if(KNOWN[name]){ const o = {lat: KNOWN[name][0], lon: KNOWN[name][1], name}; localStorage.setItem(key, JSON.stringify(o)); return o; }
-      try {
-        const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(name);
-        const res = await fetch(url, { headers: { 'Accept-Language': 'en' } });
-        const [hit] = res.ok ? await res.json() : [];
-        if(hit){ const o = {lat: parseFloat(hit.lat), lon: parseFloat(hit.lon), name}; localStorage.setItem(key, JSON.stringify(o)); return o; }
-      } catch {}
-      return { lat: 39.5, lon: -98.35, name: 'United States' };
-    }
-
-    let map, marker;
-    async function initMap(){
-      const geo = await geocodeCity(cityName);
-      const center = [geo.lat, geo.lon];
-      map = L.map('map').setView(center, 11);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
-      marker = L.marker(center).addTo(map).bindPopup(cityName).openPopup();
-      setTimeout(()=> map?.invalidateSize(), 50);
-    }
-
-    // ===== Fake data (replace with agents / backend) =====
-    function fakeIncidents(){
-      const pool = [
-        { t:'Power outage', sev:'hi', where:'Downtown', eta:'2h' },
-        { t:'Traffic collision', sev:'med', where:'I-7 W ramp', eta:'45m' },
-        { t:'Water service disruption', sev:'med', where:'Uptown', eta:'3h' },
-        { t:'Fiber cut (ISP)', sev:'hi', where:'Tech District', eta:'4h' },
-        { t:'Minor flooding', sev:'low', where:'Riverside', eta:'6h' }
-      ];
-      // Pick 2–5 at random
-      const n = Math.floor(Math.random()*4)+2;
-      return Array.from({length:n}, (_,i)=> pool[(i+Math.floor(Math.random()*pool.length))%pool.length]);
-    }
-
-    function renderIncidents(rows){
-      const list = $('#incidentsList'); const empty = $('#incidentsEmpty');
-      list.innerHTML = rows.map(r => `
+      function renderIncidents(rows) {
+        const list = $("#incidentsList");
+        const empty = $("#incidentsEmpty");
+        list.innerHTML = rows
+          .map(
+            (r) => `
         <li>
           <div>
             <div style="font-weight:600">${r.t}</div>
             <div class="muted" style="font-size:12px">${r.where}</div>
           </div>
-          <span class="badge ${r.sev==='hi'?'sev-hi':r.sev==='med'?'sev-med':'sev-low'}">ETA ${r.eta}</span>
-        </li>`).join('');
-      empty.style.display = rows.length ? 'none' : 'block';
-      $('#incidentsBadge').textContent = `${rows.length} open`;
-      $('#m-incidents').textContent = rows.length.toString();
-      $('#m-outages').textContent = rows.filter(r=>/outage|fiber/i.test(r.t)).length.toString();
-      $('#m-avgEta').textContent = approxAvgEta(rows);
-    }
+          <span class="badge ${
+            r.sev === "hi" ? "sev-hi" : r.sev === "med" ? "sev-med" : "sev-low"
+          }">ETA ${r.eta}</span>
+        </li>`
+          )
+          .join("");
+        empty.style.display = rows.length ? "none" : "block";
+        $("#incidentsBadge").textContent = `${rows.length} open`;
+        $("#m-incidents").textContent = rows.length.toString();
+        $("#m-outages").textContent = rows
+          .filter((r) => /outage|fiber/i.test(r.t))
+          .length.toString();
+        $("#m-avgEta").textContent = approxAvgEta(rows);
+      }
 
-    function approxAvgEta(rows){
-      if(!rows.length) return '–';
-      const mins = rows.map(r => {
-        const m = /([0-9]+)\s*(h|m)/i.exec(r.eta)||[0,0,'m'];
-        return m[2].toLowerCase()==='h' ? parseInt(m[1])*60 : parseInt(m[1]);
-      });
-      const avg = Math.round(mins.reduce((a,b)=>a+b,0)/mins.length);
-      return avg>=60 ? `${Math.round(avg/60)}h` : `${avg}m`;
-    }
+      function approxAvgEta(rows) {
+        if (!rows.length) return "–";
+        const mins = rows.map((r) => {
+          const m = /([0-9]+)\s*(h|m)/i.exec(r.eta) || [0, 0, "m"];
+          return m[2].toLowerCase() === "h"
+            ? parseInt(m[1]) * 60
+            : parseInt(m[1]);
+        });
+        const avg = Math.round(mins.reduce((a, b) => a + b, 0) / mins.length);
+        return avg >= 60 ? `${Math.round(avg / 60)}h` : `${avg}m`;
+      }
 
-    function renderList(el, items){ el.innerHTML = items.map(i=>`<li><span>${i.label}</span><span class="badge ${i.variant||''}">${i.value}</span></li>`).join(''); }
+      function renderList(el, items) {
+        el.innerHTML = items
+          .map(
+            (i) =>
+              `<li><span>${i.label}</span><span class="badge ${
+                i.variant || ""
+              }">${i.value}</span></li>`
+          )
+          .join("");
+      }
 
-    function seedPanels(){
-      renderList($('#utilList'), [
-        {label:'Electric grid', value:'Stable', variant:'sev-low'},
-        {label:'Water', value:'Advisory', variant:'sev-med'},
-        {label:'Gas', value:'Normal', variant:'sev-low'}
-      ]);
-      renderList($('#trafficList'), [
-        {label:'Avg. speed (citywide)', value:'27 mph'},
-        {label:'Major incidents', value:'1', variant:'sev-med'},
-        {label:'Road closures', value:'2', variant:'sev-med'}
-      ]);
-      renderList($('#waterList'), [
-        {label:'Turbidity', value:'Safe'},
-        {label:'Chlorine level', value:'OK'},
-        {label:'Boil advisory', value:'None', variant:'sev-low'}
-      ]);
-      renderList($('#citizenList'), [
-        {label:'New reports (24h)', value:'18'},
-        {label:'Reviewed', value:'12'},
-        {label:'Escalated', value:'3', variant:'sev-med'}
-      ]);
-    }
+      function seedPanels() {
+        renderList($("#utilList"), [
+          { label: "Electric grid", value: "Stable", variant: "sev-low" },
+          { label: "Water", value: "Advisory", variant: "sev-med" },
+          { label: "Gas", value: "Normal", variant: "sev-low" },
+        ]);
+        renderList($("#trafficList"), [
+          { label: "Avg. speed (citywide)", value: "27 mph" },
+          { label: "Major incidents", value: "1", variant: "sev-med" },
+          { label: "Road closures", value: "2", variant: "sev-med" },
+        ]);
+        renderList($("#waterList"), [
+          { label: "Turbidity", value: "Safe" },
+          { label: "Chlorine level", value: "OK" },
+          { label: "Boil advisory", value: "None", variant: "sev-low" },
+        ]);
+        renderList($("#citizenList"), [
+          { label: "New reports (24h)", value: "18" },
+          { label: "Reviewed", value: "12" },
+          { label: "Escalated", value: "3", variant: "sev-med" },
+        ]);
+      }
 
-    // ===== Actions =====
-    $('#printBtn').addEventListener('click', ()=> window.print());
+      // ===== Actions =====
+      $("#printBtn").addEventListener("click", () => window.print());
 
-    // Boot
-    (async function(){
-      await initMap();
-      seedPanels();
-      renderIncidents(fakeIncidents());
-    })();
-  </script>
-</body>
+      // Boot
+      (async function () {
+        await initMap();
+        seedPanels();
+        renderIncidents(fakeIncidents());
+      })();
+    </script>
+  </body>
 </html>

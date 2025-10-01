@@ -591,7 +591,7 @@
             viewBtn.classList.remove("hidden");
             viewBtn.onclick = () => {
               const url = `city.html?name=${encodeURIComponent(city.name)}`;
-              window.open(url, "_blank"); // open in new tab; change to location.href to stay single-tab
+              window.location.href = url; // same tab
             };
           } else {
             viewBtn.classList.add("hidden");
@@ -602,15 +602,8 @@
         bus.on("query:changed", render);
         bus.on("cities:loaded", render);
 
-        // Restore last selection (also reveals the View button)
-        try {
-          const saved = JSON.parse(
-            localStorage.getItem("gw:selected") || "null"
-          );
-          if (saved && saved.name) {
-            app.selectCity(saved);
-          }
-        } catch {}
+        // Ensure nothing is pre-selected on first load:
+        localStorage.removeItem("gw:selected");
       });
 
       // ========== Boot ==========
