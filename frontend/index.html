@@ -63,13 +63,15 @@
         width: 40px;
         height: 40px;
         border-radius: 10px;
-        background: linear-gradient(135deg, var(--accent), var(--accent-2));
         box-shadow: var(--shadow);
-        display: grid;
-        place-items: center;
-        font-weight: 700;
-        color: #0b1020;
+        /* Show the provided grid image inside the same 40×40 square */
+        background-image: url("Grid.png");
+        background-size: cover; /* fill the square, crop overflow */
+        background-position: center; /* center the image */
+        background-repeat: no-repeat;
+        display: block;
       }
+
       .title-wrap h1 {
         margin: 0;
         font-size: clamp(22px, 3vw, 34px);
@@ -257,15 +259,42 @@
       .hidden {
         display: none !important;
       }
+      /* Smaller pill button */
+      .btn.small {
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+
+      /* Per-row View button is hidden until the row is selected (or hovered) */
+      .option .view-btn {
+        display: none;
+        margin-right: 6px;
+      }
+      .option[aria-selected="true"] .view-btn,
+      .option:hover .view-btn {
+        display: inline-flex;
+      }
+
+      /* Hide the footer View button since we’re moving it inline */
+      #viewBtn {
+        display: none !important;
+      }
+      .option {
+        display: flex;
+        align-items: center;
+      }
+      .option .label {
+        flex: 1;
+      }
     </style>
   </head>
   <body>
     <div class="app" id="app">
       <header class="hero">
-        <div class="logo" aria-hidden="true">GW</div>
+        <div class="logo" aria-hidden="true"></div>
         <div class="title-wrap">
           <h1>Welcome to GridWatch</h1>
-          <p>Search a city to begin.</p>
+          <p>Select a city to begin.</p>
         </div>
       </header>
 
@@ -514,6 +543,9 @@
         let activeIndex = -1;
         let filtered = [];
 
+        const OPEN_RECLICK_DELAY = 450; // ms
+        let lastClick = { idx: -1, t: 0 };
+
         function render() {
           const q = store.query.trim().toLowerCase();
           filtered = !q
@@ -525,14 +557,19 @@
               const isSelected =
                 store.selectedCity && c === store.selectedCity.name;
               return `
-          <div class="option" id="opt-${i}" role="option"
-               aria-selected="${isActive || isSelected}" data-idx="${i}">
-            <span class="dot" aria-hidden="true">🏙️</span>
-            <span class="label">${highlight(c, store.query)}</span>
-            <span class="badge">US</span>
-          </div>`;
+  <div class="option" id="opt-${i}" role="option"
+       aria-selected="${isActive || isSelected}" data-idx="${i}">
+    <span class="dot" aria-hidden="true">🏙️</span>
+    <span class="label">${highlight(c, store.query)}</span>
+
+    <!-- View button now BEFORE the badge -->
+    <button class="btn small view-btn" type="button"
+            data-idx="${i}" aria-label="View ${c}">View</button>
+    <span class="badge">US</span>
+  </div>`;
             })
             .join("");
+
           countEl.textContent = filtered.length
             ? `${filtered.length} result${filtered.length === 1 ? "" : "s"}`
             : "No matches";
@@ -579,9 +616,50 @@
           }
         });
         listEl.addEventListener("click", (e) => {
+          // NEW: if the per-row View button was clicked, open immediately
+          const vb = e.target.closest(".view-btn");
+          if (vb) {
+            e.stopPropagation();
+            const idx = Number(vb.dataset.idx);
+            const city = filtered[idx];
+            if (city) {
+              window.location.href = `city.html?name=${encodeURIComponent(
+                city
+              )}`;
+            }
+            return;
+          }
           const opt = e.target.closest(".option");
           if (!opt) return;
-          selectByIndex(parseInt(opt.dataset.idx, 10));
+
+          const idx = Number(opt.dataset.idx);
+          const now = e.timeStamp || Date.now();
+
+          // True double-click: open immediately
+          if (e.detail === 2) {
+            const city = filtered[idx];
+            if (city)
+              window.location.href = `city.html?name=${encodeURIComponent(
+                city
+              )}`;
+            lastClick = { idx, t: now };
+            return;
+          }
+
+          // Re-click on the already highlighted city after a short pause: open it
+          if (idx === activeIndex && now - lastClick.t > OPEN_RECLICK_DELAY) {
+            const city = filtered[idx];
+            if (city)
+              window.location.href = `city.html?name=${encodeURIComponent(
+                city
+              )}`;
+            lastClick = { idx, t: now };
+            return;
+          }
+
+          // Otherwise just select/highlight
+          selectByIndex(idx);
+          lastClick = { idx, t: now };
         });
 
         // Show/hide + wire the View button after a selection
