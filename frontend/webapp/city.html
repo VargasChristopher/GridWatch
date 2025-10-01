@@ -32,13 +32,17 @@
         margin: 0;
         font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu,
           "Helvetica Neue", Arial;
+        color: var(--text);
+
+        /* bigger ellipse, origin pushed farther off-screen, smoother fade */
         background: radial-gradient(
-            1200px 600px at 10% -10%,
-            #1a1f3d,
-            transparent
+            1600px 1000px at 12% -25%,
+            #1a1f3d 0%,
+            rgba(26, 31, 61, 0.65) 45%,
+            rgba(26, 31, 61, 0) 85%
           ),
           var(--bg);
-        color: var(--text);
+        background-repeat: no-repeat;
       }
       .wrap {
         max-width: 1200px;
@@ -106,7 +110,7 @@
 
       main {
         display: grid;
-        grid-template-columns: 2fr 1fr;
+        grid-template-columns: 1fr;
         gap: 22px;
       }
       @media (max-width: 980px) {

@@ -52,12 +52,23 @@
         max-width: 1080px;
         margin: 0 auto;
         padding: 28px 20px 48px;
+
+        /* Center the whole block (header + search) in the viewport */
+        min-height: 100svh; /* use full viewport height */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* horizontal center */
+        justify-content: center; /* vertical center */
+        gap: 24px; /* space between header and search */
       }
+
       header.hero {
         display: flex;
         align-items: center;
+        justify-content: center; /* center header content */
         gap: 16px;
         margin: 6px 0 18px;
+        text-align: center; /* center text inside title-wrap */
       }
       .logo {
         width: 40px;
@@ -84,14 +95,11 @@
       }
 
       main {
+        /* Center the search card itself */
         display: grid;
-        grid-template-columns: 420px 1fr;
-        gap: 22px;
-      }
-      @media (max-width: 900px) {
-        main {
-          grid-template-columns: 1fr;
-        }
+        grid-template-columns: 1fr; /* single column */
+        place-items: center; /* center horizontally + vertically inside main */
+        width: 100%;
       }
 
       .panel {
@@ -104,6 +112,7 @@
       /* ======= Search Card */
       .search-card {
         padding: 14px;
+        width: min(640px, 92vw);
       }
       .input-wrap {
         position: relative;
@@ -299,7 +308,7 @@
       </header>
 
       <main>
-        <!-- Left: Search / City Picker -->
+        <!-- Search / City Picker -->
         <section class="panel search-card" aria-labelledby="searchLabel">
           <h2 id="searchLabel" style="position: absolute; left: -9999px">
             Search U.S. Cities
