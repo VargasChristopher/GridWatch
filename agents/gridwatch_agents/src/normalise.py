@@ -1,17 +1,18 @@
 # agents/gridwatch_agents/src/normalise.py
-from datetime import datetime
+from typing import List, Dict, Any
 
-def to_incidents(raw_items, domain: str):
+def to_incidents(raw: List[Dict[str, Any]], domain: str) -> Dict[str, Any]:
     out = []
-    for r in raw_items:
+    for e in raw or []:
         out.append({
-            "type": r.get("type", domain),
-            "lat": r["lat"], "lng": r["lng"],
-            "severity": float(r.get("severity", 0.5)),
-            "confidence": float(r.get("confidence", 0.7)),
-            "where": r.get("where") or r.get("locality", ""),
-            "etaMinutes": r.get("eta") or r.get("etaMinutes", 0),
-            "sources": r.get("sources", []),
-            "updatedAt": int(r.get("ts") or datetime.utcnow().timestamp()),
+            "type": e.get("type", domain),
+            "lat": float(e["lat"]),
+            "lng": float(e["lng"]),
+            "severity": float(e.get("severity", 0.5)),
+            "confidence": float(e.get("confidence", 0.7)),
+            "where": e.get("where",""),
+            "etaMinutes": int(e.get("etaMinutes", 0)),
+            "sources": e.get("sources", []),
+            "updatedAt": int(e.get("ts") or e.get("updatedAt") or 0),
         })
     return {"incidents": out}

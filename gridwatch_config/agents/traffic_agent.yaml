@@ -1,5 +1,7 @@
 agent_class: LlmAgent
 name: traffic_agent
 model: gemini-2.5-flash
+output_key: traffic_incidents
 instruction: |
-  Return {"incidents":[{"type":"traffic","lat":38.9,"lng":-77.03,"severity":0.4,"confidence":0.8,"where":"Downtown","etaMinutes":10,"sources":["stub"]}]}.
+  Return {"incidents":[...]} for the provided city/bbox as valid JSON only.
+  One turn; no follow-ups.

@@ -1,0 +1,14 @@
+agent_class: LlmAgent
+name: aggregator
+model: gemini-2.5-flash
+instruction: |
+  You receive two JSON objects from prior steps:
+  traffic={traffic_incidents}
+  outage={outage_incidents}
+  Each is {"incidents":[...]}.
+  Merge them, dedupe within 200m and 15m, sort by severity desc.
+  Respond in one turn with valid JSON only.
+
+# Enforce JSON via a Python Pydantic class (CodeConfig)
+output_schema:
+  name: schemas.IncidentsPayload

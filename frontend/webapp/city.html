@@ -366,13 +366,19 @@
       /* make the corners truly rounded and clip the blur */
       #dockInner {
         border-radius: 22px;
-        overflow: hidden; /* clip children + background */
+        /* Allow the floating labels to escape the dock so they can be shown on hover.
+           We keep the rounded corners via clip-path and the backdrop blur for visual effect. */
+        overflow: visible; /* allow labels to render above the dock */
         background-clip: padding-box; /* avoid bleed under border */
         -webkit-backdrop-filter: blur(6px); /* Safari */
         backdrop-filter: blur(6px);
 
-        /* Safari fallback when transforms are involved */
-        clip-path: inset(0 round 22px); /* forces the rounded clip */
+      /* Safari fallback when transforms are involved */
+      /* Removing clip-path so floating labels can escape the dock without being clipped.
+        The rounded corners are preserved via border-radius; if you need the strict
+        clip for a specific Safari bug, we can instead render labels outside the
+        dock DOM or use JS to position fixed labels. */
+      /* clip-path: inset(0 round 22px); */
         transition: transform 160ms ease, box-shadow 160ms ease;
       }
 
@@ -423,6 +429,7 @@
         font-size: 12px;
         white-space: nowrap;
         opacity: 0;
+        z-index: 1400; /* make sure label appears above the dock */
         pointer-events: none;
         transition: opacity 140ms ease, transform 140ms ease;
       }
