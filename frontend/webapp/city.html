@@ -368,7 +368,8 @@
         justify-content: center;
         position: relative;
         cursor: pointer;
-        transition: transform 160ms cubic-bezier(.2,.9,.2,1), box-shadow 160ms ease;
+        transition: transform 160ms cubic-bezier(0.2, 0.9, 0.2, 1),
+          box-shadow 160ms ease;
       }
       .dock-item img {
         width: 36px;
@@ -382,7 +383,7 @@
       }
       .dock-item:hover {
         transform: translateY(-8px) scale(1.08);
-        box-shadow: 0 12px 30px rgba(2,6,23,0.45);
+        box-shadow: 0 12px 30px rgba(2, 6, 23, 0.45);
       }
       .dock-label {
         position: absolute;
@@ -407,6 +408,21 @@
       /* Popover card styles */
       #subsystem-popover .card {
         margin: 8px;
+      }
+      /* iOS/Safari: make the dock corners stay rounded on mobile */
+      #dockInner {
+        /* already has border-radius: 24px inline */
+        overflow: hidden; /* clip the blurred backdrop */
+        -webkit-backdrop-filter: blur(6px); /* Safari prefix */
+        backdrop-filter: blur(6px);
+        background-clip: padding-box; /* keep gradient inside the radius */
+      }
+
+      /* Safety belt for older WebKit builds */
+      @supports (-webkit-touch-callout: none) {
+        #dockInner {
+          clip-path: inset(0 round 24px);
+        } /* hard clip to the radius */
       }
     </style>
     <link
@@ -479,14 +495,59 @@
         </section>
 
         <!-- Subsystems replaced by sticky dock (MacOS style) -->
-        <div id="subsystem-popover" class="panel" role="dialog" aria-hidden="true" style="display:none; position:fixed; left:50%; transform:translateX(-50%); bottom:96px; width:520px; max-width:94%; z-index:1200;">
-          <h2 id="popoverHdr" style="display:none">Subsystem</h2>
-          <div class="grid" style="padding: 0 14px 14px" id="popoverContent"></div>
+        <div
+          id="subsystem-popover"
+          class="panel"
+          role="dialog"
+          aria-hidden="true"
+          style="
+            display: none;
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 96px;
+            width: 520px;
+            max-width: 94%;
+            z-index: 1200;
+          "
+        >
+          <h2 id="popoverHdr" style="display: none">Subsystem</h2>
+          <div
+            class="grid"
+            style="padding: 0 14px 14px"
+            id="popoverContent"
+          ></div>
         </div>
 
         <!-- Sticky Dock Footer (MacOS-like) -->
-        <nav id="dock" aria-label="Subsystem dock" style="position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:1300;">
-          <div id="dockInner" style="display:flex; gap:18px; align-items:flex-end; padding:10px 18px; border-radius:24px; background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); box-shadow: 0 8px 24px rgba(2,6,23,0.5); backdrop-filter: blur(6px);">
+        <nav
+          id="dock"
+          aria-label="Subsystem dock"
+          style="
+            position: fixed;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 18px;
+            z-index: 1300;
+          "
+        >
+          <div
+            id="dockInner"
+            style="
+              display: flex;
+              gap: 18px;
+              align-items: flex-end;
+              padding: 10px 18px;
+              border-radius: 24px;
+              background: linear-gradient(
+                180deg,
+                rgba(255, 255, 255, 0.06),
+                rgba(255, 255, 255, 0.02)
+              );
+              box-shadow: 0 8px 24px rgba(2, 6, 23, 0.5);
+              backdrop-filter: blur(6px);
+            "
+          >
             <!-- Dock items inserted by JS -->
           </div>
         </nav>
@@ -744,9 +805,9 @@
             { label: "Escalated", value: "3", variant: "sev-med" },
           ],
         },
-    ];
+      ];
 
-    function makeDockItem(s) {
+      function makeDockItem(s) {
         const el = document.createElement("div");
         el.className = "dock-item";
         el.setAttribute("role", "button");
@@ -770,7 +831,9 @@
       }
 
       function renderDock() {
-        const container = document.getElementById("dockInner") || document.querySelector("#dockInner");
+        const container =
+          document.getElementById("dockInner") ||
+          document.querySelector("#dockInner");
         if (!container) {
           // If the DOM isn't ready for some reason, try again after DOMContentLoaded
           document.addEventListener("DOMContentLoaded", function onReady() {
@@ -791,25 +854,27 @@
         popoverContent.innerHTML =
           '<div class="card">' +
           '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-          '<h3 style="margin:0">' + s.label + '</h3>' +
+          '<h3 style="margin:0">' +
+          s.label +
+          "</h3>" +
           '<button class="btn secondary" id="closePopover">Close</button>' +
-          '</div>' +
+          "</div>" +
           '<ul class="clean">' +
           s.items
             .map(function (i) {
               return (
-                '<li><span>' +
+                "<li><span>" +
                 i.label +
                 '</span><span class="badge ' +
-                (i.variant || '') +
+                (i.variant || "") +
                 '">' +
                 i.value +
-                '</span></li>'
+                "</span></li>"
               );
             })
-            .join('') +
-          '</ul>' +
-          '</div>';
+            .join("") +
+          "</ul>" +
+          "</div>";
         popover.style.display = "block";
         popover.setAttribute("aria-hidden", "false");
         // wire up close button
@@ -838,7 +903,8 @@
       // close popover when clicking outside dock or popover
       document.addEventListener("click", (e) => {
         const withinDock = e.target.closest && e.target.closest("#dock");
-        const withinPop = e.target.closest && e.target.closest("#subsystem-popover");
+        const withinPop =
+          e.target.closest && e.target.closest("#subsystem-popover");
         if (!withinDock && !withinPop) closePopover();
       });
       // close on Escape
