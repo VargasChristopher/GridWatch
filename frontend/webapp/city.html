@@ -355,6 +355,59 @@
             var(--bg);
         }
       }
+      /* Dock styles */
+      #dockInner {
+        transition: transform 160ms ease, box-shadow 160ms ease;
+      }
+      .dock-item {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        cursor: pointer;
+        transition: transform 160ms cubic-bezier(.2,.9,.2,1), box-shadow 160ms ease;
+      }
+      .dock-item img {
+        width: 36px;
+        height: 36px;
+        display: block;
+        pointer-events: none;
+      }
+      .dock-ico {
+        font-size: 22px;
+        line-height: 1;
+      }
+      .dock-item:hover {
+        transform: translateY(-8px) scale(1.08);
+        box-shadow: 0 12px 30px rgba(2,6,23,0.45);
+      }
+      .dock-label {
+        position: absolute;
+        bottom: 64px;
+        left: 50%;
+        transform: translateX(-50%) translateY(6px);
+        background: var(--card);
+        color: var(--muted);
+        padding: 6px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        font-size: 12px;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 140ms ease, transform 140ms ease;
+      }
+      .dock-item:hover .dock-label {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      /* Popover card styles */
+      #subsystem-popover .card {
+        margin: 8px;
+      }
     </style>
     <link
       rel="stylesheet"
@@ -425,31 +478,18 @@
           </div>
         </section>
 
-        <!-- Right: Subsystems -->
-        <aside class="panel" aria-labelledby="sysHdr">
-          <h2 id="sysHdr">Subsystems</h2>
-          <div class="grid" style="padding: 0 14px 14px">
-            <div class="card" id="utilities">
-              <h3 style="margin: 0 0 8px">Utilities</h3>
-              <ul class="clean" id="utilList"></ul>
-            </div>
+        <!-- Subsystems replaced by sticky dock (MacOS style) -->
+        <div id="subsystem-popover" class="panel" role="dialog" aria-hidden="true" style="display:none; position:fixed; left:50%; transform:translateX(-50%); bottom:96px; width:520px; max-width:94%; z-index:1200;">
+          <h2 id="popoverHdr" style="display:none">Subsystem</h2>
+          <div class="grid" style="padding: 0 14px 14px" id="popoverContent"></div>
+        </div>
 
-            <div class="card" id="traffic">
-              <h3 style="margin: 0 0 8px">Traffic</h3>
-              <ul class="clean" id="trafficList"></ul>
-            </div>
-
-            <div class="card" id="water">
-              <h3 style="margin: 0 0 8px">Water Quality</h3>
-              <ul class="clean" id="waterList"></ul>
-            </div>
-
-            <div class="card" id="citizen">
-              <h3 style="margin: 0 0 8px">Citizen Reports</h3>
-              <ul class="clean" id="citizenList"></ul>
-            </div>
+        <!-- Sticky Dock Footer (MacOS-like) -->
+        <nav id="dock" aria-label="Subsystem dock" style="position:fixed; left:50%; transform:translateX(-50%); bottom:18px; z-index:1300;">
+          <div id="dockInner" style="display:flex; gap:18px; align-items:flex-end; padding:10px 18px; border-radius:24px; background:linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02)); box-shadow: 0 8px 24px rgba(2,6,23,0.5); backdrop-filter: blur(6px);">
+            <!-- Dock items inserted by JS -->
           </div>
-        </aside>
+        </nav>
       </main>
     </div>
 
@@ -636,27 +676,179 @@
           .join("");
       }
 
-      function seedPanels() {
-        renderList($("#utilList"), [
-          { label: "Electric grid", value: "Stable", variant: "sev-low" },
-          { label: "Water", value: "Advisory", variant: "sev-med" },
-          { label: "Gas", value: "Normal", variant: "sev-low" },
-        ]);
-        renderList($("#trafficList"), [
-          { label: "Avg. speed (citywide)", value: "27 mph" },
-          { label: "Major incidents", value: "1", variant: "sev-med" },
-          { label: "Road closures", value: "2", variant: "sev-med" },
-        ]);
-        renderList($("#waterList"), [
-          { label: "Turbidity", value: "Safe" },
-          { label: "Chlorine level", value: "OK" },
-          { label: "Boil advisory", value: "None", variant: "sev-low" },
-        ]);
-        renderList($("#citizenList"), [
-          { label: "New reports (24h)", value: "18" },
-          { label: "Reviewed", value: "12" },
-          { label: "Escalated", value: "3", variant: "sev-med" },
-        ]);
+      // Subsystems data and dock behavior
+      const SUBSYSTEMS = [
+        {
+          id: "utilities",
+          label: "Utilities",
+          icon: "🔌",
+          items: [
+            { label: "Electric grid", value: "Stable", variant: "sev-low" },
+            { label: "Water", value: "Advisory", variant: "sev-med" },
+            { label: "Gas", value: "Normal", variant: "sev-low" },
+          ],
+        },
+        {
+          id: "traffic",
+          label: "Traffic",
+          icon: "🚦",
+          items: [
+            { label: "Avg. speed (citywide)", value: "27 mph" },
+            { label: "Major incidents", value: "1", variant: "sev-med" },
+            { label: "Road closures", value: "2", variant: "sev-med" },
+          ],
+        },
+        {
+          id: "transit",
+          label: "Transit",
+          icon: "🚆",
+          items: [
+            { label: "On-time rate", value: "89%" },
+            { label: "Line disruptions", value: "1", variant: "sev-med" },
+          ],
+        },
+        {
+          id: "communications",
+          label: "Communications",
+          icon: "📡",
+          items: [
+            { label: "Cell coverage", value: "Good" },
+            { label: "ISP outages", value: "2", variant: "sev-hi" },
+          ],
+        },
+        {
+          id: "emergency",
+          label: "Emergency",
+          icon: "🚑",
+          items: [
+            { label: "Active incidents", value: "3", variant: "sev-med" },
+            { label: "Avg response time", value: "7 min" },
+          ],
+        },
+        {
+          id: "environment",
+          label: "Environment",
+          icon: "🌳",
+          items: [
+            { label: "Air quality (AQI)", value: "42" },
+            { label: "Flood alerts", value: "None", variant: "sev-low" },
+          ],
+        },
+        {
+          id: "citizen",
+          label: "Citizen Reports",
+          icon: "📣",
+          items: [
+            { label: "New reports (24h)", value: "18" },
+            { label: "Reviewed", value: "12" },
+            { label: "Escalated", value: "3", variant: "sev-med" },
+          ],
+        },
+    ];
+
+    function makeDockItem(s) {
+        const el = document.createElement("div");
+        el.className = "dock-item";
+        el.setAttribute("role", "button");
+        el.setAttribute("tabindex", "0");
+        el.dataset.id = s.id;
+        el.innerHTML = `
+          <div class="dock-ico" aria-hidden="true">${s.icon}</div>
+          <div class="dock-label">${s.label}</div>
+        `;
+        el.addEventListener("click", (e) => {
+          e.stopPropagation();
+          togglePopover(s.id);
+        });
+        el.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            togglePopover(s.id);
+          }
+        });
+        return el;
+      }
+
+      function renderDock() {
+        const container = document.getElementById("dockInner") || document.querySelector("#dockInner");
+        if (!container) {
+          // If the DOM isn't ready for some reason, try again after DOMContentLoaded
+          document.addEventListener("DOMContentLoaded", function onReady() {
+            document.removeEventListener("DOMContentLoaded", onReady);
+            renderDock();
+          });
+          return;
+        }
+        container.innerHTML = "";
+        SUBSYSTEMS.forEach(function (s) {
+          container.appendChild(makeDockItem(s));
+        });
+      }
+
+      function openPopover(id) {
+        const s = SUBSYSTEMS.find((x) => x.id === id);
+        if (!s) return;
+        popoverContent.innerHTML =
+          '<div class="card">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+          '<h3 style="margin:0">' + s.label + '</h3>' +
+          '<button class="btn secondary" id="closePopover">Close</button>' +
+          '</div>' +
+          '<ul class="clean">' +
+          s.items
+            .map(function (i) {
+              return (
+                '<li><span>' +
+                i.label +
+                '</span><span class="badge ' +
+                (i.variant || '') +
+                '">' +
+                i.value +
+                '</span></li>'
+              );
+            })
+            .join('') +
+          '</ul>' +
+          '</div>';
+        popover.style.display = "block";
+        popover.setAttribute("aria-hidden", "false");
+        // wire up close button
+        const cb = document.getElementById("closePopover");
+        if (cb) cb.addEventListener("click", closePopover);
+      }
+
+      function closePopover() {
+        popover.style.display = "none";
+        popover.setAttribute("aria-hidden", "true");
+      }
+
+      function togglePopover(id) {
+        if (popover.style.display === "block") {
+          // if same, close; otherwise open new
+          const openId = popover.dataset.openId;
+          if (openId === id) {
+            closePopover();
+            return;
+          }
+        }
+        popover.dataset.openId = id;
+        openPopover(id);
+      }
+
+      // close popover when clicking outside dock or popover
+      document.addEventListener("click", (e) => {
+        const withinDock = e.target.closest && e.target.closest("#dock");
+        const withinPop = e.target.closest && e.target.closest("#subsystem-popover");
+        if (!withinDock && !withinPop) closePopover();
+      });
+      // close on Escape
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closePopover();
+      });
+
+      // Render dock on boot
+      function initDock() {
+        renderDock();
       }
 
       // ===== Actions =====
@@ -664,9 +856,23 @@
 
       // Boot
       (async function () {
-        await initMap();
-        seedPanels();
-        renderIncidents(fakeIncidents());
+        try {
+          await initMap();
+        } catch (err) {
+          // Map failed to initialize (e.g. Leaflet not available) — continue so UI (dock) still renders
+          // eslint-disable-next-line no-console
+          console.warn("initMap failed:", err);
+        }
+        try {
+          initDock();
+        } catch (err) {
+          console.error("initDock failed:", err);
+        }
+        try {
+          renderIncidents(fakeIncidents());
+        } catch (err) {
+          console.warn("renderIncidents failed:", err);
+        }
       })();
     </script>
   </body>
