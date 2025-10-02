@@ -460,15 +460,19 @@
       const cityName =
         decodeURIComponent(params.get("name") || "").trim() || "Unknown City";
 
-      // Build the pretty path, e.g. "New York, NY" -> "/NewYork-NY"
       function toPrettyPath(full) {
         const [cityRaw, stateRaw = ""] = full.split(",").map((s) => s.trim());
-        const strip = (s) =>
-          s
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "") // remove accents
-            .replace(/[^A-Za-z0-9]/g, ""); // remove spaces/punct
-        return `/${strip(cityRaw)}-${strip(stateRaw)}`;
+        const norm = (s) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        // Preserve real hyphens in the slug with `--`, use `-` for spaces
+        const citySlug = norm(cityRaw)
+          .replace(/-/g, "--") // real hyphens -> double hyphen
+          .replace(/\s+/g, "-") // spaces -> single hyphen
+          .replace(/[^A-Za-z0-9-]/g, "");
+        const state = norm(stateRaw)
+          .replace(/[^A-Za-z]/g, "")
+          .slice(0, 2)
+          .toUpperCase();
+        return `/${citySlug}-${state}`;
       }
 
       // If we arrived via /city.html?name=..., swap the URL to the pretty form

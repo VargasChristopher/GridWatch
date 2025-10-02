@@ -485,27 +485,30 @@
           /^\/+|\/+$/g,
           ""
         );
-        // ignore files like .css/.js and the root:
         if (!path || /\.[a-z0-9]+$/i.test(path)) return;
 
-        // Accept "NewYork-NY" or "New-York-NY"
-        const m = path.match(
-          /^([A-Za-z][A-Za-z-]*|[A-Za-z]+(?:[A-Z][a-z]+)+)-([A-Za-z]{2})$/
-        );
+        // Match "<any-city-slug>-ST"
+        const m = path.match(/^(.+)-([A-Za-z]{2})$/);
         if (!m) return;
+        const [, citySlug, st] = m;
 
-        const city = m[1]
-          .replace(/-/g, " ")
-          .replace(/([a-z])([A-Z])/g, "$1 $2")
-          .trim();
-        const state = m[2].toUpperCase();
-        const target = `/city.html?name=${encodeURIComponent(
-          `${city}, ${state}`
-        )}`;
+        function fromSlug(slug) {
+          return slug
+            .replace(/--/g, "\u0000") // temp marker for real hyphens
+            .replace(/-/g, " ") // hyphens that were spaces
+            .replace(/\u0000/g, "-") // restore real hyphens
+            .replace(/([a-z])([A-Z])/g, "$1 $2")
+            .trim();
+        }
 
-        // Jump to the actual city page (same-tab)
-        location.replace(target);
+        const city = fromSlug(citySlug);
+        location.replace(
+          `/city.html?name=${encodeURIComponent(
+            `${city}, ${st.toUpperCase()}`
+          )}`
+        );
       })();
+
       // ========== Core ==========
       class EventBus {
         constructor() {
