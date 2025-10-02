@@ -1,0 +1,13 @@
+<script>
+  const path = location.pathname.replace(/^\//, "");
+  if (path) {
+    const parts = path.split("-");
+    if (parts.length >= 2) {
+      const city = parts.slice(0, -1).join(" ");
+      const state = parts[parts.length - 1];
+      location.replace(
+        `/city.html?name=${encodeURIComponent(city + ", " + state)}`
+      );
+    }
+  }
+</script>

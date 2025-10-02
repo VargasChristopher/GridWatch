@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Welcome to GridWatch</title>
+    <meta name="color-scheme" content="light dark" />
+    <title>GridWatch</title>
     <meta
       name="description"
       content="GridWatch — an agentic city management system. Search U.S. cities and prepare for future features like alerts and heatmaps."
@@ -76,7 +77,7 @@
         border-radius: 10px;
         box-shadow: var(--shadow);
         /* Show the provided grid image inside the same 40×40 square */
-        background-image: url("Grid.png");
+        background-image: url("/Grid.png");
         background-size: cover; /* fill the square, crop overflow */
         background-position: center; /* center the image */
         background-repeat: no-repeat;
@@ -295,7 +296,123 @@
       .option .label {
         flex: 1;
       }
+      /* ===== THEME FOUNDATION (add at end) ===== */
+      :root {
+        /* Tell UA we support both schemes */
+        color-scheme: light dark;
+
+        /* Light defaults */
+        --bg: #f6f8fb;
+        --panel: #ffffff;
+        --panel-2: #f6f8ff;
+        --border: #d9dfec;
+        --muted: #667085;
+        --text: #111322;
+        --accent: #7aa8ff;
+        --accent-2: #4ce1b6;
+        --focus: 0 0 0 3px rgba(122, 168, 255, 0.35);
+        --radius: 14px;
+        --shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+
+        /* Additional tokens for places that were hard-coded */
+        --card: #ffffff;
+        --field: #ffffff;
+        --hover: #f2f4fb;
+        --line: #e6eaf5;
+        --chip-bg: #eef2ff;
+        --scroll-track: #f1f3f8;
+        --scroll-thumb: #cfd6e8;
+      }
+
+      /* Dark overrides mirror your current design */
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0f1220;
+          --panel: #171a2b;
+          --panel-2: #1f2340;
+          --border: #2a2f55;
+          --muted: #9aa3b2;
+          --text: #e8ebf4;
+          --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+
+          --card: #0d1022;
+          --field: #0d1022;
+          --hover: #151a36;
+          --line: #181c36;
+          --chip-bg: #0f1430;
+          --scroll-track: #0f1430;
+          --scroll-thumb: #2b315f;
+        }
+      }
+
+      /* Use variables to override earlier hard-coded colors (no markup changes) */
+      body {
+        background: radial-gradient(
+            1200px 600px at 10% -10%,
+            #e9eefc,
+            transparent
+          ),
+          var(--bg);
+        color: var(--text);
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: radial-gradient(
+              1200px 600px at 10% -10%,
+              #1a1f3d,
+              transparent
+            ),
+            var(--bg);
+        }
+      }
+
+      .panel {
+        background: linear-gradient(180deg, var(--panel), var(--panel-2));
+        border: 1px solid var(--border);
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+      }
+      #citySearch {
+        background: var(--field);
+        color: var(--text);
+        border: 1px solid var(--border);
+      }
+      .results {
+        background: var(--card);
+        border: 1px solid var(--border);
+      }
+      .option {
+        border-bottom: 1px solid var(--line);
+      }
+      .option:hover,
+      .option[aria-selected="true"] {
+        background: var(--hover);
+      }
+      .option .badge {
+        background: var(--chip-bg);
+        color: var(--muted);
+      }
+      .tag,
+      .kbd {
+        background: var(--chip-bg);
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+
+      /* Scrollbar colors */
+      .results::-webkit-scrollbar-track {
+        background: var(--scroll-track);
+        border-left: 1px solid var(--border);
+      }
+      .results::-webkit-scrollbar-thumb {
+        background: var(--scroll-thumb);
+        border: 2px solid var(--scroll-track);
+        border-radius: 10px;
+      }
     </style>
+    <link rel="preload" as="image" href="/Grid.png" />
   </head>
   <body>
     <div class="app" id="app">
@@ -357,17 +474,38 @@
           <div class="meta">
             <span id="resultCount">Type to filter cities</span>
             <button id="viewBtn" class="btn hidden">View</button>
-            <span
-              >Tip: Use <span class="kbd">↑</span>
-              <span class="kbd">↓</span> then
-              <span class="kbd">Enter</span></span
-            >
           </div>
         </section>
       </main>
     </div>
 
     <script>
+      (() => {
+        const path = decodeURIComponent(location.pathname).replace(
+          /^\/+|\/+$/g,
+          ""
+        );
+        // ignore files like .css/.js and the root:
+        if (!path || /\.[a-z0-9]+$/i.test(path)) return;
+
+        // Accept "NewYork-NY" or "New-York-NY"
+        const m = path.match(
+          /^([A-Za-z][A-Za-z-]*|[A-Za-z]+(?:[A-Z][a-z]+)+)-([A-Za-z]{2})$/
+        );
+        if (!m) return;
+
+        const city = m[1]
+          .replace(/-/g, " ")
+          .replace(/([a-z])([A-Z])/g, "$1 $2")
+          .trim();
+        const state = m[2].toUpperCase();
+        const target = `/city.html?name=${encodeURIComponent(
+          `${city}, ${state}`
+        )}`;
+
+        // Jump to the actual city page (same-tab)
+        location.replace(target);
+      })();
       // ========== Core ==========
       class EventBus {
         constructor() {
@@ -541,6 +679,25 @@
           return txt;
         }
       }
+      function toPrettyPath(full) {
+        // "New York, NY" -> "/NewYork-NY"
+        const [cityRaw, stateRaw = ""] = full.split(",").map((s) => s.trim());
+        const strip = (s) =>
+          s
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // strip accents
+            .replace(/[^A-Za-z0-9]/g, ""); // remove spaces/punct
+        const city = strip(cityRaw); // "NewYork"
+        const state = strip(stateRaw); // "NY"
+        return `/${city}-${state}`;
+      }
+      function prefetchCity(name) {
+        const l = document.createElement("link");
+        l.rel = "prefetch";
+        l.as = "document";
+        l.href = `/city.html?name=${encodeURIComponent(name)}`;
+        document.head.appendChild(l);
+      }
 
       // ========== Search + selection UI ==========
       app.use(({ bus, store }) => {
@@ -632,9 +789,13 @@
             const idx = Number(vb.dataset.idx);
             const city = filtered[idx];
             if (city) {
-              window.location.href = `city.html?name=${encodeURIComponent(
-                city
-              )}`;
+              // helper
+              const goToCity = (name) =>
+                (window.location.href = `/city.html?name=${encodeURIComponent(
+                  name
+                )}`);
+
+              goToCity(city);
             }
             return;
           }
@@ -647,10 +808,15 @@
           // True double-click: open immediately
           if (e.detail === 2) {
             const city = filtered[idx];
-            if (city)
-              window.location.href = `city.html?name=${encodeURIComponent(
-                city
-              )}`;
+            if (city) {
+              // helper
+              const goToCity = (name) =>
+                (window.location.href = `/city.html?name=${encodeURIComponent(
+                  name
+                )}`);
+
+              goToCity(city);
+            }
             lastClick = { idx, t: now };
             return;
           }
@@ -658,10 +824,15 @@
           // Re-click on the already highlighted city after a short pause: open it
           if (idx === activeIndex && now - lastClick.t > OPEN_RECLICK_DELAY) {
             const city = filtered[idx];
-            if (city)
-              window.location.href = `city.html?name=${encodeURIComponent(
-                city
-              )}`;
+            if (city) {
+              // helper
+              const goToCity = (name) =>
+                (window.location.href = `/city.html?name=${encodeURIComponent(
+                  name
+                )}`);
+
+              goToCity(city);
+            }
             lastClick = { idx, t: now };
             return;
           }
@@ -675,10 +846,16 @@
         bus.on("city:selected", (city) => {
           if (!viewBtn) return;
           if (city && city.name) {
+            prefetchCity(city);
             viewBtn.classList.remove("hidden");
             viewBtn.onclick = () => {
-              const url = `city.html?name=${encodeURIComponent(city.name)}`;
-              window.location.href = url; // same tab
+              // helper
+              const goToCity = (name) =>
+                (window.location.href = `/city.html?name=${encodeURIComponent(
+                  name
+                )}`);
+
+              goToCity(city.name);
             };
           } else {
             viewBtn.classList.add("hidden");

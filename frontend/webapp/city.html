@@ -8,6 +8,8 @@
       name="description"
       content="City-specific dashboard for GridWatch with map, incidents, and subsystem panels."
     />
+    <meta name="color-scheme" content="light dark" />
+
     <style>
       :root {
         --bg: #0f1220;
@@ -20,6 +22,8 @@
         --accent-2: #4ce1b6;
         --radius: 14px;
         --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        --btn-secondary-bg: var(--card);
+        --btn-secondary-fg: var(--text);
       }
       * {
         box-sizing: border-box;
@@ -67,7 +71,7 @@
         border-radius: 10px;
         box-shadow: var(--shadow);
         /* Show the provided grid image inside the same 40×40 square */
-        background-image: url("Grid.png");
+        background-image: url("/Grid.png");
         background-size: cover; /* fill the square, crop overflow */
         background-position: center; /* center the image */
         background-repeat: no-repeat;
@@ -99,8 +103,8 @@
         text-decoration: none;
       }
       .btn.secondary {
-        background: #0f1430;
-        color: var(--text);
+        background: transparent !important;
+        color: var(--btn-secondary-fg) !important;
         border: 1px solid var(--border);
       }
       .btn:focus {
@@ -219,6 +223,138 @@
       .muted {
         color: var(--muted);
       }
+      /* ===== THEME FOUNDATION ===== */
+      :root {
+        color-scheme: light dark;
+
+        /* Light defaults */
+        --bg: #f6f8fb;
+        --panel: #ffffff;
+        --panel-2: #f6f8ff;
+        --border: #d9dfec;
+        --muted: #667085;
+        --text: #111322;
+        --accent: #7aa8ff;
+        --accent-2: #4ce1b6;
+        --radius: 14px;
+        --shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+
+        --card: #ffffff;
+        --line: #e6eaf5;
+
+        /* severity chips (light) */
+        --sev-hi-bg: rgba(255, 59, 48, 0.08);
+        --sev-hi-bd: #ff3b30;
+        --sev-hi-tx: #b3261e;
+        --sev-med-bg: rgba(255, 186, 0, 0.1);
+        --sev-med-bd: #f2a60c;
+        --sev-med-tx: #7a5800;
+        --sev-low-bg: rgba(16, 185, 129, 0.1);
+        --sev-low-bd: #2ea37d;
+        --sev-low-tx: #0f5132;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --btn-secondary-bg: #0f1430;
+          --btn-secondary-fg: var(--text);
+          --bg: #0f1220;
+          --panel: #171a2b;
+          --panel-2: #1f2340;
+          --border: #2a2f55;
+          --muted: #9aa3b2;
+          --text: #e8ebf4;
+          --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+
+          --card: #0d1022;
+          --line: #181c36;
+
+          --sev-hi-bg: rgba(255, 88, 88, 0.1);
+          --sev-hi-bd: #6b1a1a;
+          --sev-hi-tx: #ff8f8f;
+          --sev-med-bg: rgba(255, 200, 88, 0.08);
+          --sev-med-bd: #5b481a;
+          --sev-med-tx: #ffd890;
+          --sev-low-bg: rgba(100, 240, 180, 0.08);
+          --sev-low-bd: #2a5b4a;
+          --sev-low-tx: #9bf3cf;
+        }
+      }
+
+      /* Apply variables to existing blocks */
+      body {
+        background: radial-gradient(
+            1600px 1000px at 12% -25%,
+            #e9eefc 0%,
+            rgba(233, 238, 252, 0.65) 45%,
+            rgba(233, 238, 252, 0) 85%
+          ),
+          var(--bg);
+        color: var(--text);
+        background-repeat: no-repeat !important;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: radial-gradient(
+              1600px 1000px at 12% -25%,
+              #1a1f3d 0%,
+              rgba(26, 31, 61, 0.65) 45%,
+              rgba(26, 31, 61, 0) 85%
+            ),
+            var(--bg);
+          background-repeat: no-repeat !important;
+        }
+      }
+
+      .panel {
+        background: linear-gradient(180deg, var(--panel), var(--panel-2));
+        border: 1px solid var(--border);
+      }
+      .card,
+      .stat,
+      #map {
+        background: var(--card);
+        border: 1px solid var(--border);
+      }
+      ul.clean li {
+        border-bottom: 1px solid var(--line);
+      }
+      .muted,
+      .sub {
+        color: var(--muted);
+      }
+
+      .badge {
+        background: var(--card);
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
+      .sev-hi {
+        background: var(--sev-hi-bg);
+        border-color: var(--sev-hi-bd);
+        color: var(--sev-hi-tx);
+      }
+      .sev-med {
+        background: var(--sev-med-bg);
+        border-color: var(--sev-med-bd);
+        color: var(--sev-med-tx);
+      }
+      .sev-low {
+        background: var(--sev-low-bg);
+        border-color: var(--sev-low-bd);
+        color: var(--sev-low-tx);
+      }
+      @media (prefers-color-scheme: light) {
+        body {
+          background: radial-gradient(
+              1800px 1200px at -10% -25%,
+              #e9eefc 0%,
+              rgba(233, 238, 252, 0.65) 45%,
+              rgba(233, 238, 252, 0) 85%
+            ),
+            var(--bg);
+        }
+      }
     </style>
     <link
       rel="stylesheet"
@@ -231,6 +367,7 @@
       integrity="sha256-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44c="
       crossorigin
     ></script>
+    <link rel="preload" as="image" href="/Grid.png" />
   </head>
   <body>
     <div class="wrap">
@@ -243,7 +380,7 @@
           </div>
         </div>
         <div style="display: flex; gap: 8px; align-items: center">
-          <a href="index.html" class="btn secondary" id="backBtn">← Back</a>
+          <a href="/" class="btn secondary" id="backBtn">← Back</a>
           <button class="btn" id="printBtn">Print report</button>
         </div>
       </header>
@@ -323,6 +460,26 @@
       const cityName =
         decodeURIComponent(params.get("name") || "").trim() || "Unknown City";
 
+      // Build the pretty path, e.g. "New York, NY" -> "/NewYork-NY"
+      function toPrettyPath(full) {
+        const [cityRaw, stateRaw = ""] = full.split(",").map((s) => s.trim());
+        const strip = (s) =>
+          s
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "") // remove accents
+            .replace(/[^A-Za-z0-9]/g, ""); // remove spaces/punct
+        return `/${strip(cityRaw)}-${strip(stateRaw)}`;
+      }
+
+      // If we arrived via /city.html?name=..., swap the URL to the pretty form
+      (function () {
+        const params = new URLSearchParams(location.search);
+        const name = params.get("name");
+        if (name) {
+          history.replaceState({ city: name }, "", toPrettyPath(name)); // updates URL without new history entry
+        }
+      })();
+
       const KNOWN = {
         "New York, NY": [40.7128, -74.006],
         "Los Angeles, CA": [34.0522, -118.2437],
@@ -341,7 +498,7 @@
         "Colorado Springs, CO": [38.8339, -104.8214],
       };
 
-      document.title = `${cityName} — GridWatch`;
+      document.title = `${cityName}`;
       $("#cityName").textContent = cityName;
       $(
         "#subhead"
