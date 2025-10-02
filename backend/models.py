@@ -1,10 +1,13 @@
 from typing import List, Optional, Literal, Dict
 from pydantic import BaseModel, Field
-from datetime import datetime, timezone
+from datetime import datetime
 
 SourceType = Literal["open311","here_incident","here_flow","tweet","news","manual"]
-EventType = Literal["water_main_break","road_closure","lane_restriction","congestion"]
-IncidentStatus = Literal["active","resolved"]
+EventType = Literal[
+    "water_main_break","road_closure","lane_restriction","congestion",
+    "power_outage","water_line_break","gas_leak","internet_outage","accident"
+]
+IncidentStatus = Literal["active","resolved","monitoring"]
 ActionStatus = Literal["pending","done"]
 
 class Evidence(BaseModel):
@@ -19,7 +22,7 @@ class Evidence(BaseModel):
     confidence: float = 0.6
     url: Optional[str] = None
     raw: Dict = Field(default_factory=dict)
-    detected_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    detected_at: datetime = Field(default_factory=datetime.utcnow)
 
 class WhyCard(BaseModel):
     rules_fired: List[str] = []
@@ -44,4 +47,4 @@ class Incident(BaseModel):
     sources: List[Dict] = []
     why: WhyCard = WhyCard()
     actions: List[ActionStep] = []
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    created_at: datetime = Field(default_factory=datetime.utcnow)
