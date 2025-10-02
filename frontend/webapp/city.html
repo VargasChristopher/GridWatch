@@ -355,10 +355,35 @@
             var(--bg);
         }
       }
-      /* Dock styles */
+      /* keep the bar off the very edges + respect the iOS home bar */
+      #dock {
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: calc(18px + env(safe-area-inset-bottom));
+        width: min(94vw, 560px);
+      }
+
+      /* make the corners truly rounded and clip the blur */
       #dockInner {
+        border-radius: 22px;
+        overflow: hidden; /* clip children + background */
+        background-clip: padding-box; /* avoid bleed under border */
+        -webkit-backdrop-filter: blur(6px); /* Safari */
+        backdrop-filter: blur(6px);
+
+        /* Safari fallback when transforms are involved */
+        clip-path: inset(0 round 22px); /* forces the rounded clip */
         transition: transform 160ms ease, box-shadow 160ms ease;
       }
+
+      /* Stop hover “pop” from spilling past the curve on touch */
+      @media (hover: none) {
+        .dock-item:hover {
+          transform: none;
+          box-shadow: none;
+        }
+      }
+
       .dock-item {
         width: 56px;
         height: 56px;
@@ -408,21 +433,6 @@
       /* Popover card styles */
       #subsystem-popover .card {
         margin: 8px;
-      }
-      /* iOS/Safari: make the dock corners stay rounded on mobile */
-      #dockInner {
-        /* already has border-radius: 24px inline */
-        overflow: hidden; /* clip the blurred backdrop */
-        -webkit-backdrop-filter: blur(6px); /* Safari prefix */
-        backdrop-filter: blur(6px);
-        background-clip: padding-box; /* keep gradient inside the radius */
-      }
-
-      /* Safety belt for older WebKit builds */
-      @supports (-webkit-touch-callout: none) {
-        #dockInner {
-          clip-path: inset(0 round 24px);
-        } /* hard clip to the radius */
       }
     </style>
     <link
