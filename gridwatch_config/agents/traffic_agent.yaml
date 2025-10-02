@@ -1,0 +1,5 @@
+agent_class: LlmAgent
+name: traffic_agent
+model: gemini-2.5-flash
+instruction: |
+  Return {"incidents":[{"type":"traffic","lat":38.9,"lng":-77.03,"severity":0.4,"confidence":0.8,"where":"Downtown","etaMinutes":10,"sources":["stub"]}]}.

@@ -1,0 +1,9 @@
+# ---------- requirements.txt ----------
+google-genai>=1.0.0
+google-adk>=0.2.0        # adjust to the version you’re using
+pydantic>=2.4
+httpx>=0.27
+google-cloud-pubsub>=2.16.0
+functions-framework
+gunicorn
+# flask

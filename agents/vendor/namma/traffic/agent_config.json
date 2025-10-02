@@ -1,0 +1,54 @@
+{
+  "agents": [
+    {
+      "name": "RoadBlockAgent",
+      "description": "Handles updates related to road blocks.",
+      "model": "gemini-2.0-flash",
+      "instruction": "Provide updates on road blocks in the area.",
+      "input_schema": null,
+      "output_key": "road_block_result",
+      "execution": {
+        "enabled": true,
+        "frequency": "5m"
+      },
+      "settings": {
+        "notification_channel": "app_notification"
+      }
+    },
+    {
+      "name": "AccidentAgent",
+      "description": "Monitors and responds to accident reports.",
+      "model": "gemini-2.0-flash",
+      "instruction": "Report accident details affecting traffic.",
+      "input_schema": null,
+      "output_key": "accident_result",
+      "execution": {
+        "enabled": true,
+        "frequency": "10m"
+      },
+      "settings": {
+        "reporting_channels": ["sms", "app_notification"],
+        "response_time": "15m"
+      }
+    },
+    {
+      "name": "EnvironmentAgent",
+      "description": "Tracks environmental conditions impacting traffic.",
+      "model": "gemini-2.0-flash",
+      "instruction": "Monitor environmental conditions relevant to traffic.",
+      "input_schema": null,
+      "output_key": "environment_result",
+      "execution": {
+        "enabled": true,
+        "frequency": "30m"
+      },
+      "settings": {
+        "monitored_parameters": ["weather", "visibility"],
+        "alert_thresholds": {
+          "weather": "severe",
+          "visibility": "low"
+        }
+      }
+    }
+  ]
+}

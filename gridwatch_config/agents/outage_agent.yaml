@@ -1,0 +1,5 @@
+agent_class: LlmAgent
+name: outage_agent
+model: gemini-2.5-flash
+instruction: |
+  Return {"incidents":[{"type":"outage","lat":38.91,"lng":-77.04,"severity":0.7,"confidence":0.7,"where":"NW","etaMinutes":30,"sources":["stub"]}]}.
