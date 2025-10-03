@@ -6,4 +6,4 @@ tenacity==8.*
 cachetools==5.*
 haversine==2.*
 python-dotenv==1.*
-SQLAlchemy==2.*
+google-cloud-firestore==3.*
