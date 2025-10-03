@@ -458,6 +458,7 @@
       integrity="sha256-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44c="
       crossorigin
     ></script>
+    <script src="/js/api.js"></script>
     <link rel="preload" as="image" href="/Grid.png" />
   </head>
   <body>
@@ -597,8 +598,15 @@
         return s ? s.label : id || "";
       }
 
-      // Heuristic: infer a category from the incident title until your backend sends `cat`
-      function inferCategory(title = "") {
+      // Use the cat property from backend, with fallback inference
+      function inferCategory(incident) {
+        // If backend provides category, use it
+        if (incident.cat) {
+          return incident.cat;
+        }
+        
+        // Fallback to title-based inference
+        const title = incident.title || incident.t || "";
         const t = String(title).toLowerCase();
         if (
           t.includes("traffic") ||
@@ -762,7 +770,21 @@
         setTimeout(() => map?.invalidateSize(), 50);
       }
 
-      // ===== Fake data (replace with agents / backend) =====
+      // ===== Real data from backend =====
+      const api = new GridWatchAPI('http://localhost:8000');
+      
+      async function loadRealIncidents() {
+        try {
+          const incidents = await api.getIncidents();
+          return incidents.map(incident => api.transformIncident(incident));
+        } catch (error) {
+          console.error('Failed to load incidents:', error);
+          // Fallback to fake data if backend is unavailable
+          return fakeIncidents();
+        }
+      }
+
+      // Fallback fake data for when backend is unavailable
       function fakeIncidents() {
         const pool = [
           {
@@ -813,13 +835,13 @@
             (r) => `
             <li>
               <div>
-                <div style="font-weight:600">${r.t}</div>
+                <div style="font-weight:600">${r.title || r.t}</div>
                 <div class="muted" style="font-size:12px">${r.where}</div>
               </div>
               <span class="badge ${
-                r.sev === "hi"
+                r.severity === "hi" || r.sev === "hi"
                   ? "sev-hi"
-                  : r.sev === "med"
+                  : r.severity === "med" || r.sev === "med"
                   ? "sev-med"
                   : "sev-low"
               }">ETA ${r.eta}</span>
@@ -830,7 +852,7 @@
         $("#incidentsBadge").textContent = `${rows.length} open`;
         $("#m-incidents").textContent = rows.length.toString();
         $("#m-outages").textContent = rows
-          .filter((r) => /outage|fiber/i.test(r.t))
+          .filter((r) => r.cat === 'outage' || /outage|fiber/i.test(r.title || r.t))
           .length.toString();
         $("#m-avgEta").textContent = approxAvgEta(rows);
       }
@@ -1071,7 +1093,7 @@
           const lon = r.lon ?? jitter(mapCenter[1]);
           const m = L.marker([lat, lon])
             .addTo(map)
-            .bindPopup(`${r.t}<br><small>${r.where}</small>`);
+            .bindPopup(`${r.title || r.t}<br><small>${r.where}</small>`);
           incidentMarkers[i] = m;
         });
       }
@@ -1097,7 +1119,7 @@
           // Remember the full set given to us; tag each with a category if not present
           allIncidents = (rows || []).map((r) =>
             r && typeof r === "object"
-              ? { ...r, cat: r.cat || inferCategory(r.t) }
+              ? { ...r, cat: r.cat || inferCategory(r) }
               : r
           );
 
@@ -1167,7 +1189,17 @@
           console.error("initDock failed:", err);
         }
         try {
-          renderIncidents(fakeIncidents());
+          // Load real incidents from backend
+          loadRealIncidents().then(incidents => {
+            // Data is already transformed in loadRealIncidents
+            renderIncidents(incidents);
+            
+            // Start polling for updates every 30 seconds
+            api.startPolling(30000, (newIncidents) => {
+              const transformed = newIncidents.map(incident => api.transformIncident(incident));
+              renderIncidents(transformed);
+            });
+          });
         } catch (err) {
           console.warn("renderIncidents failed:", err);
         }
