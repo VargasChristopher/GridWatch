@@ -1,24 +1,34 @@
-<script>
-  (function () {
-    const path = decodeURIComponent(location.pathname).replace(/^\/+/, "");
-    const parts = path.split("-");
-    if (parts.length < 2) return;
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirecting…</title>
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+  </head>
+  <body>
+    <script>
+      (function () {
+        const path = decodeURIComponent(location.pathname).replace(/^\/+/, "");
+        const parts = path.split("-");
+        if (parts.length < 2) return;
 
-    const state = parts.pop();
-    const citySlug = parts.join("-");
+        const state = parts.pop();
+        const citySlug = parts.join("-");
 
-    function fromSlug(slug) {
-      return slug
-        .replace(/--/g, "\u0000")
-        .replace(/-/g, " ")
-        .replace(/\u0000/g, "-")
-        .replace(/([a-z])([A-Z])/g, "$1 $2")
-        .trim();
-    }
+        function fromSlug(slug) {
+          return slug
+            .replace(/--/g, "\u0000")
+            .replace(/-/g, " ")
+            .replace(/\u0000/g, "-")
+            .replace(/([a-z])([A-Z])/g, "$1 $2")
+            .trim();
+        }
 
-    const city = fromSlug(citySlug);
-    location.replace(
-      `/city.html?name=${encodeURIComponent(`${city}, ${state}`)}`
-    );
-  })();
-</script>
+        const city = fromSlug(citySlug);
+        location.replace(
+          `/city.html?name=${encodeURIComponent(`${city}, ${state}`)}`
+        );
+      })();
+    </script>
+  </body>
+</html>
