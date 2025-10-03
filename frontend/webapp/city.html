@@ -573,6 +573,7 @@
     </div>
 
     <script>
+      const incidentMarkers = [];
       // ===== Helpers =====
       const $ = (sel, root = document) => root.querySelector(sel);
       const params = new URLSearchParams(location.search);
@@ -660,7 +661,7 @@
         return { lat: 39.5, lon: -98.35, name: "United States" };
       }
 
-      let map, marker;
+      let map, marker, mapCenter;
       async function initMap() {
         const geo = await geocodeCity(cityName);
         const center = [geo.lat, geo.lon];
@@ -676,7 +677,12 @@
       // ===== Fake data (replace with agents / backend) =====
       function fakeIncidents() {
         const pool = [
-          { t: "Power outage", sev: "hi", where: "Downtown", eta: "2h" },
+          {
+            t: "Power outage",
+            sev: "hi",
+            where: "Downtown",
+            eta: "2h"
+          },
           {
             t: "Traffic collision",
             sev: "med",
@@ -695,7 +701,12 @@
             where: "Tech District",
             eta: "4h",
           },
-          { t: "Minor flooding", sev: "low", where: "Riverside", eta: "6h" },
+          {
+            t: "Minor flooding",
+            sev: "low",
+            where: "Riverside",
+            eta: "6h",
+          },
         ];
         // Pick 2–5 at random
         const n = Math.floor(Math.random() * 4) + 2;
@@ -967,6 +978,50 @@
         });
       }
 
+      // === 2) helpers: place markers + ping one ===
+      function placeIncidentMarkers(rows) {
+        if (!map) return;
+        // clear previous
+        incidentMarkers.forEach((m) => map.removeLayer(m));
+        incidentMarkers.length = 0;
+
+        // quick demo coords: jitter around city center if none provided
+        const jitter = (v) => v + (Math.random() - 0.5) * 0.04; // ~a few km
+        rows.forEach((r, i) => {
+          const lat = r.lat ?? jitter(mapCenter[0]);
+          const lon = r.lon ?? jitter(mapCenter[1]);
+          const m = L.marker([lat, lon])
+            .addTo(map)
+            .bindPopup(`${r.t}<br><small>${r.where}</small>`);
+          incidentMarkers[i] = m;
+        });
+      }
+
+      function pingIncident(i) {
+        const m = incidentMarkers[i];
+        if (!m) return;
+        const ll = m.getLatLng();
+        map.flyTo(ll, Math.max(map.getZoom(), 13), { duration: 0.6 }); // smooth focus
+        m.openPopup();
+        const ring = L.circle(ll, {
+          radius: 250,
+          color: "#7aa8ff",
+          weight: 2,
+          fillOpacity: 0.1,
+        }).addTo(map);
+        setTimeout(() => map.removeLayer(ring), 800); // brief “ping” ring
+      }
+
+      // === 3) extend your existing renderer to wire up clicks ===
+      const _renderIncidents = renderIncidents;
+      renderIncidents = function (rows) {
+        _renderIncidents(rows);
+        placeIncidentMarkers(rows);
+        [...document.querySelectorAll("#incidentsList li")].forEach((li, i) => {
+          li.onclick = () => pingIncident(i);
+        });
+      };
+
       (async function () {
         try {
           await ensureLeafletCSS();
@@ -986,7 +1041,9 @@
               ? [qLat, qLon]
               : [geo.lat, geo.lon];
 
-          const map = L.map("map").setView(center, qZoom);
+          // const map = L.map("map").setView(center, qZoom);
+          map = L.map("map").setView(center, qZoom);
+          mapCenter = center;
           L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
             maxZoom: 19,
             attribution: "© OpenStreetMap contributors",
