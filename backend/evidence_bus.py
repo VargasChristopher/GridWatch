@@ -1,7 +1,7 @@
 from collections import deque
 from time import time
 from typing import List
-from .models import Evidence
+from models import Evidence
 
 class EvidenceBus:
     def __init__(self, ttl_seconds: int = 300):

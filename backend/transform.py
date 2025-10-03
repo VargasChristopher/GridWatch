@@ -1,6 +1,6 @@
 from typing import List
-from .models import Incident
-from .models_public import IncidentOut, PublicSource, PublicAction
+from models import Incident
+from models_public import IncidentOut, PublicSource, PublicAction
 
 # Map internal incident.type -> external label (adjust as needed)
 _TYPE_MAP = {

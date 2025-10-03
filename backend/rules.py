@@ -1,5 +1,5 @@
 from typing import List, Dict
-from .models import Evidence
+from models import Evidence
 
 WEIGHTS = {
     "open311": 1.0,
@@ -82,6 +82,10 @@ def summary_for(inc_type: str, v: Dict) -> str:
         "internet_outage": "Internet outage reported.",
         "accident": "Traffic accident reported."
     }.get(inc_type, "Incident detected.")
-    if v.get("impact", {}).get("eta_delta_min"):
-        base += f" ETA impact ~{v['impact']['eta_delta_min']} min."
+    
+    # Check if impact exists and has eta_delta_min
+    impact = v.get("impact")
+    if impact and isinstance(impact, dict) and impact.get("eta_delta_min"):
+        base += f" ETA impact ~{impact['eta_delta_min']} min."
+    
     return base

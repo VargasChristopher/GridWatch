@@ -1,12 +1,23 @@
 from fastapi import FastAPI, Query
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List, Optional
-from .models import Evidence
-from .evidence_bus import EvidenceBus
-from .orchestrator import build_incidents
-from .transform import to_public
-from .db_firestore import upsert_incidents, query_incidents
+from models import Evidence
+from evidence_bus import EvidenceBus
+from orchestrator import build_incidents
+from transform import to_public
+from db_firestore import upsert_incidents, query_incidents
 
 app = FastAPI(title="GridWatch Orchestrator")
+
+# Add CORS middleware for frontend integration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify your frontend domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 bus = EvidenceBus(ttl_seconds=300)
 
 @app.get("/health")
@@ -32,6 +43,16 @@ def list_incidents(
     # Persist latest snapshot to Firestore (idempotent)
     upsert_incidents(public)
 
-    # Serve from Firestore so UI survives restarts / cold starts
+    # Try to serve from Firestore, fallback to fresh data if Firestore unavailable
     rows = query_incidents(limit=limit, since_iso=since)
+    
+    # If Firestore is not available or returns empty, serve fresh data
+    if not rows:
+        # Convert datetime objects to ISO strings for JSON response
+        for incident in public:
+            incident['created_at'] = incident['created_at'].isoformat()
+            if incident.get('time'):
+                incident['time'] = incident['time'].isoformat()
+        rows = public[:limit]
+    
     return {"data": rows}

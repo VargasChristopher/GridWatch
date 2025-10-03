@@ -1,6 +1,6 @@
 from typing import List, Dict
-from .models import Evidence, Incident, ActionStep, WhyCard
-from .rules import verify_and_score, summary_for
+from models import Evidence, Incident, ActionStep, WhyCard
+from rules import verify_and_score, summary_for
 
 def _cluster_key(e: Evidence) -> str:
     # coarse grid-based key to cluster nearby evidence of the same type
