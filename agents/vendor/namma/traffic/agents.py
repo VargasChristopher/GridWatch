@@ -1,13 +1,24 @@
+import json
 from google.adk.agents import LlmAgent
-from orca import load_agent_config
 
-# Load the entire configuration from agent_config.json
-config_map = load_agent_config('agent_config.json')
+# Load agent configs locally to avoid circular import with orca.py
+def _load_agent_configs(path: str = 'agent_config.json'):
+    with open(path, 'r') as f:
+        cfg = json.load(f)
+    road_block_config = None
+    accident_config = None
+    environment_config = None
+    for agent in cfg.get("agents", []):
+        name = agent.get("name", "")
+        if "RoadBlock" in name:
+            road_block_config = agent
+        elif "Accident" in name:
+            accident_config = agent
+        elif "Environment" in name:
+            environment_config = agent
+    return road_block_config, accident_config, environment_config
 
-# Extract individual agent configurations
-road_block_config = config_map.get("RoadBlockAgent")
-accident_config = config_map.get("AccidentAgent")
-environment_config = config_map.get("EnvironmentAgent")
+road_block_config, accident_config, environment_config = _load_agent_configs('agent_config.json')
 
 # Create LLM agents using attributes from configuration
 road_block_agent = LlmAgent(
