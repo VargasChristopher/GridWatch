@@ -360,7 +360,7 @@
         left: 50%;
         transform: translateX(-50%);
         bottom: calc(18px + env(safe-area-inset-bottom));
-        width: min(94vw, 560px);
+        width: min(75vw, 400px);
       }
 
       /* make the corners truly rounded and clip the blur */
@@ -440,6 +440,11 @@
       /* Popover card styles */
       #subsystem-popover .card {
         margin: 8px;
+      }
+      .dock-item.active {
+        transform: translateY(-4px) scale(1.05);
+        outline: 2px solid var(--border);
+        border-radius: 12px;
       }
     </style>
     <link
@@ -574,6 +579,89 @@
 
     <script>
       const incidentMarkers = [];
+      let allIncidents = [];
+      let activeFilter = null;
+      const FILTERABLE_IDS = new Set([
+        "outage",
+        "traffic",
+        "crime",
+        "environment",
+        "emergency",
+      ]);
+
+      function labelFor(id) {
+        const s =
+          typeof SUBSYSTEMS !== "undefined" && Array.isArray(SUBSYSTEMS)
+            ? SUBSYSTEMS.find((x) => x.id === id)
+            : null;
+        return s ? s.label : id || "";
+      }
+
+      // Heuristic: infer a category from the incident title until your backend sends `cat`
+      function inferCategory(title = "") {
+        const t = String(title).toLowerCase();
+        if (
+          t.includes("traffic") ||
+          t.includes("collision") ||
+          t.includes("congestion") ||
+          t.includes("road")
+        )
+          return "traffic";
+        if (
+          t.includes("robbery") ||
+          t.includes("assault") ||
+          t.includes("burglary") ||
+          t.includes("shots") ||
+          t.includes("crime")
+        )
+          return "crime";
+        if (
+          t.includes("wildfire") ||
+          t.includes("smoke") ||
+          t.includes("air") ||
+          t.includes("heat") ||
+          t.includes("flood")
+        )
+          return "environment";
+        if (
+          t.includes("fire") ||
+          t.includes("ems") ||
+          t.includes("medical") ||
+          t.includes("rescue")
+        )
+          return "emergency";
+        if (
+          t.includes("outage") ||
+          t.includes("service") ||
+          t.includes("fiber") ||
+          t.includes("internet") ||
+          t.includes("power") ||
+          t.includes("water") ||
+          t.includes("gas")
+        )
+          return "outage";
+        return "outage";
+      }
+
+      function setActiveFilter(id) {
+        if (!FILTERABLE_IDS.has(id)) return; // ignore non-filter dock items
+        activeFilter = activeFilter === id ? null : id; // toggle on/off
+        document
+          .querySelectorAll("#dockInner .dock-item")
+          .forEach((d) =>
+            d.classList.toggle("active", d.dataset.id === activeFilter)
+          );
+        if (Array.isArray(allIncidents)) renderIncidents(allIncidents); // re-render using wrapper below
+      }
+
+      function updateIncidentsUIExtras(rows) {
+        const badge = document.getElementById("incidentsBadge");
+        if (badge) {
+          const suffix = activeFilter ? " • " + labelFor(activeFilter) : "";
+          badge.textContent = `${rows.length} open${suffix}`;
+        }
+      }
+
       // ===== Helpers =====
       const $ = (sel, root = document) => root.querySelector(sel);
       const params = new URLSearchParams(location.search);
@@ -681,7 +769,7 @@
             t: "Power outage",
             sev: "hi",
             where: "Downtown",
-            eta: "2h"
+            eta: "2h",
           },
           {
             t: "Traffic collision",
@@ -773,13 +861,13 @@
       // Subsystems data and dock behavior
       const SUBSYSTEMS = [
         {
-          id: "utilities",
-          label: "Utilities",
-          icon: "🔌",
+          id: "outage",
+          label: "Outage",
+          icon: "⚡",
           items: [
-            { label: "Electric grid", value: "Stable", variant: "sev-low" },
-            { label: "Water", value: "Advisory", variant: "sev-med" },
-            { label: "Gas", value: "Normal", variant: "sev-low" },
+            { label: "Power", value: "2 outages", variant: "sev-med" },
+            { label: "Internet", value: "1 outage", variant: "sev-med" },
+            { label: "Water service", value: "Normal", variant: "sev-low" },
           ],
         },
         {
@@ -793,21 +881,12 @@
           ],
         },
         {
-          id: "transit",
-          label: "Transit",
-          icon: "🚆",
+          id: "crime",
+          label: "Crime",
+          icon: "🚓",
           items: [
-            { label: "On-time rate", value: "89%" },
-            { label: "Line disruptions", value: "1", variant: "sev-med" },
-          ],
-        },
-        {
-          id: "emergency",
-          label: "Emergency",
-          icon: "🚑",
-          items: [
-            { label: "Active incidents", value: "3", variant: "sev-med" },
-            { label: "Avg response time", value: "7 min" },
+            { label: "Active alerts", value: "3", variant: "sev-med" },
+            { label: "New reports (24h)", value: "12" },
           ],
         },
         {
@@ -820,13 +899,12 @@
           ],
         },
         {
-          id: "citizen",
-          label: "Citizen Reports",
-          icon: "📣",
+          id: "emergency",
+          label: "Emergency",
+          icon: "🚑",
           items: [
-            { label: "New reports (24h)", value: "18" },
-            { label: "Reviewed", value: "12" },
-            { label: "Escalated", value: "3", variant: "sev-med" },
+            { label: "Active incidents", value: "3", variant: "sev-med" },
+            { label: "Avg response time", value: "7 min" },
           ],
         },
       ];
@@ -843,6 +921,7 @@
             `;
         el.addEventListener("click", (e) => {
           e.stopPropagation();
+          setActiveFilter(s.id);
           togglePopover(s.id);
         });
         el.addEventListener("keydown", (e) => {
@@ -1012,14 +1091,41 @@
         setTimeout(() => map.removeLayer(ring), 800); // brief “ping” ring
       }
 
-      // === 3) extend your existing renderer to wire up clicks ===
       const _renderIncidents = renderIncidents;
       renderIncidents = function (rows) {
-        _renderIncidents(rows);
-        placeIncidentMarkers(rows);
-        [...document.querySelectorAll("#incidentsList li")].forEach((li, i) => {
-          li.onclick = () => pingIncident(i);
-        });
+        try {
+          // Remember the full set given to us; tag each with a category if not present
+          allIncidents = (rows || []).map((r) =>
+            r && typeof r === "object"
+              ? { ...r, cat: r.cat || inferCategory(r.t) }
+              : r
+          );
+
+          const toShow = activeFilter
+            ? allIncidents.filter((r) => r && r.cat === activeFilter)
+            : allIncidents;
+
+          _renderIncidents(toShow);
+          placeIncidentMarkers(toShow);
+
+          // Rebind “ping” for the filtered list
+          [...document.querySelectorAll("#incidentsList li")].forEach(
+            (li, i) => {
+              li.onclick = () => pingIncident(i);
+            }
+          );
+
+          updateIncidentsUIExtras(toShow);
+        } catch (e) {
+          // Safe fallback
+          _renderIncidents(rows || []);
+          placeIncidentMarkers(rows || []);
+          [...document.querySelectorAll("#incidentsList li")].forEach(
+            (li, i) => {
+              li.onclick = () => pingIncident(i);
+            }
+          );
+        }
       };
 
       (async function () {
