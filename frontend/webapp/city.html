@@ -373,12 +373,12 @@
         -webkit-backdrop-filter: blur(6px); /* Safari */
         backdrop-filter: blur(6px);
 
-      /* Safari fallback when transforms are involved */
-      /* Removing clip-path so floating labels can escape the dock without being clipped.
+        /* Safari fallback when transforms are involved */
+        /* Removing clip-path so floating labels can escape the dock without being clipped.
         The rounded corners are preserved via border-radius; if you need the strict
         clip for a specific Safari bug, we can instead render labels outside the
         dock DOM or use JS to position fixed labels. */
-      /* clip-path: inset(0 round 22px); */
+        /* clip-path: inset(0 round 22px); */
         transition: transform 160ms ease, box-shadow 160ms ease;
       }
 
@@ -552,6 +552,7 @@
             id="dockInner"
             style="
               display: flex;
+              justify-content: center;
               gap: 18px;
               align-items: flex-end;
               padding: 10px 18px;
@@ -711,15 +712,19 @@
         list.innerHTML = rows
           .map(
             (r) => `
-        <li>
-          <div>
-            <div style="font-weight:600">${r.t}</div>
-            <div class="muted" style="font-size:12px">${r.where}</div>
-          </div>
-          <span class="badge ${
-            r.sev === "hi" ? "sev-hi" : r.sev === "med" ? "sev-med" : "sev-low"
-          }">ETA ${r.eta}</span>
-        </li>`
+            <li>
+              <div>
+                <div style="font-weight:600">${r.t}</div>
+                <div class="muted" style="font-size:12px">${r.where}</div>
+              </div>
+              <span class="badge ${
+                r.sev === "hi"
+                  ? "sev-hi"
+                  : r.sev === "med"
+                  ? "sev-med"
+                  : "sev-low"
+              }">ETA ${r.eta}</span>
+            </li>`
           )
           .join("");
         empty.style.display = rows.length ? "none" : "block";
@@ -786,15 +791,6 @@
           ],
         },
         {
-          id: "communications",
-          label: "Communications",
-          icon: "📡",
-          items: [
-            { label: "Cell coverage", value: "Good" },
-            { label: "ISP outages", value: "2", variant: "sev-hi" },
-          ],
-        },
-        {
           id: "emergency",
           label: "Emergency",
           icon: "🚑",
@@ -831,9 +827,9 @@
         el.setAttribute("tabindex", "0");
         el.dataset.id = s.id;
         el.innerHTML = `
-          <div class="dock-ico" aria-hidden="true">${s.icon}</div>
-          <div class="dock-label">${s.label}</div>
-        `;
+              <div class="dock-ico" aria-hidden="true">${s.icon}</div>
+              <div class="dock-label">${s.label}</div>
+            `;
         el.addEventListener("click", (e) => {
           e.stopPropagation();
           togglePopover(s.id);
@@ -937,15 +933,71 @@
       // ===== Actions =====
       $("#printBtn").addEventListener("click", () => window.print());
 
-      // Boot
+      // Ensure Leaflet's CSS is actually applied (otherwise tiles "escape")
+      function ensureLeafletCSS() {
+        return new Promise((resolve) => {
+          // Detect whether the .leaflet-container rule is active
+          const probe = document.createElement("div");
+          probe.style.cssText = "position:absolute;left:-9999px;top:-9999px";
+          probe.className = "leaflet-container";
+          document.body.appendChild(probe);
+          const ok = getComputedStyle(probe).position === "relative";
+          document.body.removeChild(probe);
+          if (ok) return resolve();
+
+          // Fallback CSS if the first CDN failed
+          const link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href =
+            "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css";
+          link.onload = () => resolve();
+          document.head.appendChild(link);
+        });
+      }
+
+      async function ensureLeafletJS() {
+        if (window.L) return;
+        await new Promise((res, rej) => {
+          const s = document.createElement("script");
+          s.src = "https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js";
+          s.crossOrigin = "";
+          s.onload = res;
+          s.onerror = () => rej(new Error("Leaflet failed to load"));
+          document.head.appendChild(s);
+        });
+      }
+
       (async function () {
         try {
-          await initMap();
+          await ensureLeafletCSS();
+          // If the first CDN (unpkg) didn’t define L, pull a fallback source
+          await ensureLeafletJS();
+
+          // If you want to allow direct lat/lon: /city.html?lat=38.9072&lon=-77.0369&z=12
+          const p = new URLSearchParams(location.search);
+          const qLat = parseFloat(p.get("lat"));
+          const qLon = parseFloat(p.get("lon"));
+          const qZoom = parseInt(p.get("z") || "11", 10);
+
+          // Your existing geocode + map init, with a raw-lat/lon override
+          const geo = await geocodeCity(cityName);
+          const center =
+            !Number.isNaN(qLat) && !Number.isNaN(qLon)
+              ? [qLat, qLon]
+              : [geo.lat, geo.lon];
+
+          const map = L.map("map").setView(center, qZoom);
+          L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: "© OpenStreetMap contributors",
+          }).addTo(map);
+
+          L.marker(center).addTo(map).bindPopup(cityName).openPopup();
+          setTimeout(() => map.invalidateSize(), 50);
         } catch (err) {
-          // Map failed to initialize (e.g. Leaflet not available) — continue so UI (dock) still renders
-          // eslint-disable-next-line no-console
-          console.warn("initMap failed:", err);
+          console.warn("Map boot failed:", err);
         }
+
         try {
           initDock();
         } catch (err) {
