@@ -4,7 +4,7 @@
  */
 
 class GridWatchAPI {
-  constructor(baseURL = 'http://localhost:8000') {
+  constructor(baseURL = 'https://gridwatch-backend-554454627121.us-east1.run.app') {
     this.baseURL = baseURL;
     this.pollInterval = null;
     this.onIncidentsUpdate = null;
