@@ -1,6 +1,5 @@
 from typing import List, Dict, Any
 from datetime import datetime, timezone
-import os
 
 # Initialize Firestore client with error handling
 db = None
