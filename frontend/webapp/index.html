@@ -475,6 +475,19 @@
           <div class="meta">
             <span id="resultCount">Type to filter cities</span>
             <button id="viewBtn" class="btn hidden">View</button>
+            <label
+              class="remember"
+              for="rememberChoice"
+              style="
+                margin-left: auto;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+              "
+            >
+              <input type="checkbox" id="rememberChoice" />
+              Remember choice
+            </label>
           </div>
         </section>
       </main>
@@ -710,6 +723,22 @@
         const countEl = $("#resultCount");
         const viewBtn = $("#viewBtn");
 
+        const REMEMBER_KEY = "gw:remember";
+        const SELECTED_KEY = "gw:selected";
+        const rememberEl = document.getElementById("rememberChoice");
+
+        // Initialize from saved pref
+        const remember = localStorage.getItem(REMEMBER_KEY) === "1"; // Storage.getItem
+        if (rememberEl) rememberEl.checked = remember; // checkbox.checked
+
+        // Persist preference and clear saved city if turned off
+        rememberEl?.addEventListener("change", () => {
+          // change event
+          const v = rememberEl.checked ? "1" : "0";
+          localStorage.setItem(REMEMBER_KEY, v); // Storage.setItem
+          if (!rememberEl.checked) localStorage.removeItem(SELECTED_KEY);
+        });
+
         let activeIndex = -1;
         let filtered = [];
 
@@ -872,22 +901,18 @@
       });
 
       (function () {
-        // If the URL has ?noredirect=1, skip redirect and clean it up.
         const p = new URLSearchParams(location.search);
         if (p.has("noredirect")) {
-          history.replaceState(null, "", "/"); // remove the query from the bar
-          return;
-        }
-
-        try {
+          history.replaceState(null, "", "/");
+        } else {
+          const remember = localStorage.getItem("gw:remember") === "1";
           const last = JSON.parse(
             localStorage.getItem("gw:selected") || "null"
           );
-          if (last?.name) {
-            // Normal behavior: send to last city
+          if (remember && last?.name) {
             location.href = "/city.html?name=" + encodeURIComponent(last.name);
           }
-        } catch {}
+        }
       })();
 
       // ========== Boot ==========

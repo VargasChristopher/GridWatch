@@ -677,7 +677,11 @@
         decodeURIComponent(params.get("name") || "").trim() || "Unknown City";
 
       try {
-        localStorage.setItem("gw:selected", JSON.stringify({ name: cityName }));
+        if (localStorage.getItem("gw:remember") === "1")
+          localStorage.setItem(
+            "gw:selected",
+            JSON.stringify({ name: cityName })
+          );
       } catch {}
 
       function toPrettyPath(full) {
@@ -775,7 +779,9 @@
       }
 
       // ===== Real data from backend =====
-      const api = new GridWatchAPI("https://gridwatch-backend-554454627121.us-east1.run.app");
+      const api = new GridWatchAPI(
+        "https://gridwatch-backend-554454627121.us-east1.run.app"
+      );
       console.log("API Base URL:", api.baseURL);
 
       async function loadRealIncidents() {
