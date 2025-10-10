@@ -872,11 +872,19 @@
       });
 
       (function () {
+        // If the URL has ?noredirect=1, skip redirect and clean it up.
+        const p = new URLSearchParams(location.search);
+        if (p.has("noredirect")) {
+          history.replaceState(null, "", "/"); // remove the query from the bar
+          return;
+        }
+
         try {
           const last = JSON.parse(
             localStorage.getItem("gw:selected") || "null"
           );
           if (last?.name) {
+            // Normal behavior: send to last city
             location.href = "/city.html?name=" + encodeURIComponent(last.name);
           }
         } catch {}
