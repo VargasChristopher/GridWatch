@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>GridWatch</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta
       name="description"
       content="GridWatch — an agentic city management system. Search U.S. cities and prepare for future features like alerts and heatmaps."
@@ -869,10 +869,18 @@
 
         bus.on("query:changed", render);
         bus.on("cities:loaded", render);
-
-        // Ensure nothing is pre-selected on first load:
-        localStorage.removeItem("gw:selected");
       });
+
+      (function () {
+        try {
+          const last = JSON.parse(
+            localStorage.getItem("gw:selected") || "null"
+          );
+          if (last?.name) {
+            location.href = "/city.html?name=" + encodeURIComponent(last.name);
+          }
+        } catch {}
+      })();
 
       // ========== Boot ==========
       (async function init() {

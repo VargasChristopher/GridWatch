@@ -604,7 +604,7 @@
         if (incident.cat) {
           return incident.cat;
         }
-        
+
         // Fallback to title-based inference
         const title = incident.title || incident.t || "";
         const t = String(title).toLowerCase();
@@ -675,6 +675,10 @@
       const params = new URLSearchParams(location.search);
       const cityName =
         decodeURIComponent(params.get("name") || "").trim() || "Unknown City";
+
+      try {
+        localStorage.setItem("gw:selected", JSON.stringify({ name: cityName }));
+      } catch {}
 
       function toPrettyPath(full) {
         const [cityRaw, stateRaw = ""] = full.split(",").map((s) => s.trim());
@@ -771,14 +775,14 @@
       }
 
       // ===== Real data from backend =====
-      const api = new GridWatchAPI('http://localhost:8000');
-      
+      const api = new GridWatchAPI("http://localhost:8000");
+
       async function loadRealIncidents() {
         try {
           const incidents = await api.getIncidents();
-          return incidents.map(incident => api.transformIncident(incident));
+          return incidents.map((incident) => api.transformIncident(incident));
         } catch (error) {
-          console.error('Failed to load incidents:', error);
+          console.error("Failed to load incidents:", error);
           // Fallback to fake data if backend is unavailable
           return fakeIncidents();
         }
@@ -852,7 +856,9 @@
         $("#incidentsBadge").textContent = `${rows.length} open`;
         $("#m-incidents").textContent = rows.length.toString();
         $("#m-outages").textContent = rows
-          .filter((r) => r.cat === 'outage' || /outage|fiber/i.test(r.title || r.t))
+          .filter(
+            (r) => r.cat === "outage" || /outage|fiber/i.test(r.title || r.t)
+          )
           .length.toString();
         $("#m-avgEta").textContent = approxAvgEta(rows);
       }
@@ -1190,13 +1196,15 @@
         }
         try {
           // Load real incidents from backend
-          loadRealIncidents().then(incidents => {
+          loadRealIncidents().then((incidents) => {
             // Data is already transformed in loadRealIncidents
             renderIncidents(incidents);
-            
+
             // Start polling for updates every 30 seconds
             api.startPolling(30000, (newIncidents) => {
-              const transformed = newIncidents.map(incident => api.transformIncident(incident));
+              const transformed = newIncidents.map((incident) =>
+                api.transformIncident(incident)
+              );
               renderIncidents(transformed);
             });
           });
