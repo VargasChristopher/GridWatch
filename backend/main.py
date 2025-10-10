@@ -12,7 +12,7 @@ app = FastAPI(title="GridWatch Orchestrator")
 # Add CORS middleware for frontend integration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*", "https://gridwatch.dev"],  # In production, specify your frontend domain
+    allow_origins=["*"],  # In production, specify your frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
