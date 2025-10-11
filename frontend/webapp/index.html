@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>GridWatch</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <meta
       name="description"
       content="GridWatch — an agentic city management system. Search U.S. cities and prepare for future features like alerts and heatmaps."
@@ -15,17 +15,17 @@
        Design tokens
        =============== */
       :root {
-        --bg: #0f1220;
-        --panel: #171a2b;
-        --panel-2: #1f2340;
-        --border: #2a2f55;
-        --muted: #9aa3b2;
-        --text: #e8ebf4;
-        --accent: #7aa8ff;
-        --accent-2: #4ce1b6;
-        --focus: 0 0 0 3px rgba(122, 168, 255, 0.35);
+        --bg: #f6f7f8;
+        --panel: #ffffff;
+        --panel-2: #f2f2f2;
+        --border: #d9d9d9;
+        --muted: #6b6b6b;
+        --text: #111111;
+        --accent: #bdbdbd;
+        --accent-2: #7a7a7a;
+        --focus: 0 0 0 3px rgba(0, 0, 0, 0.18);
         --radius: 14px;
-        --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        --shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
       }
 
       * {
@@ -42,7 +42,7 @@
           "Segoe UI Emoji";
         background: radial-gradient(
             1200px 600px at 10% -10%,
-            #1a1f3d,
+            #1a1a1a,
             transparent
           ),
           var(--bg);
@@ -132,7 +132,7 @@
         border-radius: 999px;
         border: 1px solid var(--border);
         outline: none;
-        background: #0d1022;
+        background: #111111;
         color: var(--text);
         font-size: 16px;
         box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
@@ -147,25 +147,25 @@
         overflow: auto;
         border-radius: 12px;
         border: 1px solid var(--border);
-        background: #0d1022;
+        background: #111111;
       }
       /* Custom scrollbars */
       .results::-webkit-scrollbar {
         width: 12px;
       }
       .results::-webkit-scrollbar-track {
-        background: #0f1430;
+        background: #141414;
         border-left: 1px solid var(--border);
       }
       .results::-webkit-scrollbar-thumb {
-        background: #2b315f;
-        border: 2px solid #0f1430;
+        background: #343434;
+        border: 2px solid #141414;
         border-radius: 10px;
       }
 
       .option {
         padding: 12px 14px;
-        border-bottom: 1px solid #181c36;
+        border-bottom: 1px solid #262626;
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -173,14 +173,14 @@
       }
       .option:hover,
       .option[aria-selected="true"] {
-        background: #151a36;
+        background: #1b1b1b;
       }
       .option:last-child {
         border-bottom: none;
       }
       .option .badge {
         margin-left: auto;
-        background: #1e2447;
+        background: #2a2a2a;
         padding: 2px 8px;
         border-radius: 999px;
         font-size: 12px;
@@ -210,7 +210,7 @@
         gap: 14px;
       }
       .card {
-        background: #0d1022;
+        background: #111111;
         border: 1px solid var(--border);
         border-radius: 12px;
         padding: 14px;
@@ -228,7 +228,7 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: #0f1430;
+        background: #141414;
         border: 1px solid var(--border);
         padding: 6px 10px;
         border-radius: 999px;
@@ -247,7 +247,7 @@
         border: 1px solid var(--border);
         padding: 2px 6px;
         border-radius: 6px;
-        background: #0f1430;
+        background: #141414;
       }
       /* Buttons + utility */
       .btn {
@@ -303,46 +303,46 @@
         color-scheme: light dark;
 
         /* Light defaults */
-        --bg: #f6f8fb;
+        --bg: #f6f7f8;
         --panel: #ffffff;
-        --panel-2: #f6f8ff;
-        --border: #d9dfec;
-        --muted: #667085;
-        --text: #111322;
-        --accent: #7aa8ff;
-        --accent-2: #4ce1b6;
-        --focus: 0 0 0 3px rgba(122, 168, 255, 0.35);
+        --panel-2: #f2f2f2;
+        --border: #d9d9d9;
+        --muted: #6b6b6b;
+        --text: #111111;
+        --accent: #bdbdbd;
+        --accent-2: #7a7a7a;
+        --focus: 0 0 0 3px rgba(0, 0, 0, 0.18);
         --radius: 14px;
         --shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 
         /* Additional tokens for places that were hard-coded */
         --card: #ffffff;
         --field: #ffffff;
-        --hover: #f2f4fb;
-        --line: #e6eaf5;
-        --chip-bg: #eef2ff;
-        --scroll-track: #f1f3f8;
-        --scroll-thumb: #cfd6e8;
+        --hover: #f5f5f5;
+        --line: #e7e7e7;
+        --chip-bg: #f2f2f2;
+        --scroll-track: #f0f0f0;
+        --scroll-thumb: #cccccc;
       }
 
       /* Dark overrides mirror your current design */
       @media (prefers-color-scheme: dark) {
         :root {
-          --bg: #0f1220;
-          --panel: #171a2b;
-          --panel-2: #1f2340;
-          --border: #2a2f55;
-          --muted: #9aa3b2;
-          --text: #e8ebf4;
+          --bg: #0b0b0c;
+          --panel: #121212;
+          --panel-2: #1a1a1a;
+          --border: #2a2a2a;
+          --muted: #9a9a9a;
+          --text: #f3f3f3;
           --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
 
-          --card: #0d1022;
-          --field: #0d1022;
-          --hover: #151a36;
-          --line: #181c36;
-          --chip-bg: #0f1430;
-          --scroll-track: #0f1430;
-          --scroll-thumb: #2b315f;
+          --card: #111111;
+          --field: #111111;
+          --hover: #1b1b1b;
+          --line: #262626;
+          --chip-bg: #161616;
+          --scroll-track: #141414;
+          --scroll-thumb: #343434;
         }
       }
 
@@ -350,7 +350,7 @@
       body {
         background: radial-gradient(
             1200px 600px at 10% -10%,
-            #e9eefc,
+            #1a1a1a,
             transparent
           ),
           var(--bg);
@@ -360,7 +360,7 @@
         body {
           background: radial-gradient(
               1200px 600px at 10% -10%,
-              #1a1f3d,
+              #1a1a1a,
               transparent
             ),
             var(--bg);
@@ -412,8 +412,76 @@
         border: 2px solid var(--scroll-track);
         border-radius: 10px;
       }
+      /* === faint, underlay grid (light + dark) === */
+      :root {
+        --grid-size: 24px; /* cell size */
+        --grid-major-mult: 4; /* every Nth line is “major” */
+        /* lighter alphas for subtle look (light mode) */
+        --grid-line: rgba(0, 0, 0, 0.025);
+        --grid-major-line: rgba(0, 0, 0, 0.045);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          /* darker theme gets even softer lines */
+          --grid-line: rgba(255, 255, 255, 0.02);
+          --grid-major-line: rgba(255, 255, 255, 0.04);
+        }
+      }
+
+      /* create a stacking context so the grid can sit behind everything */
+      body {
+        position: relative;
+        z-index: 0;
+      }
+
+      /* draw grid BEHIND content */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: -1; /* << key: under all content */
+        opacity: 0.5; /* overall strength (lower = subtler) */
+
+        /* minor vertical, minor horizontal, major vertical, major horizontal */
+        background-image: repeating-linear-gradient(
+            to right,
+            var(--grid-line) 0 1px,
+            transparent 1px var(--grid-size)
+          ),
+          repeating-linear-gradient(
+            to bottom,
+            var(--grid-line) 0 1px,
+            transparent 1px var(--grid-size)
+          ),
+          repeating-linear-gradient(
+            to right,
+            var(--grid-major-line) 0 1px,
+            transparent 1px calc(var(--grid-size) * var(--grid-major-mult))
+          ),
+          repeating-linear-gradient(
+            to bottom,
+            var(--grid-major-line) 0 1px,
+            transparent 1px calc(var(--grid-size) * var(--grid-major-mult))
+          );
+        background-attachment: fixed, fixed, fixed, fixed; /* stays put on scroll */
+      }
+
+      :root {
+        --shadow-soft: 0 1px 4px rgba(0, 0, 0, 0.12);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.22);
+        }
+      }
+
+      .option .view-btn {
+        box-shadow: var(--shadow-soft);
+      }
     </style>
-    <link rel="preload" as="image" href="/Grid.png" />
+    <link rel="preload" as="image" href="/Grid.png" type="image/png" />
   </head>
   <body>
     <div class="app" id="app">
