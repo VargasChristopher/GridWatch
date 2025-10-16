@@ -132,7 +132,9 @@ class GridWatchAPI {
       actions: incident.actions || [],
       created_at: incident.created_at,
       status: incident.status,
-      cat: this.getCategory(incident.type) // Add category for filtering
+      cat: this.getCategory(incident.type), // Add category for filtering
+      icon: this.getIncidentIcon(incident), // Add icon for display
+      color: this.getIncidentColor(incident) // Add color for display
     };
   }
 
@@ -161,7 +163,10 @@ class GridWatchAPI {
       'power_outage': 'Power Outage',
       'water_main_break': 'Water Main Break',
       'gas_leak': 'Gas Leak',
-      'internet_outage': 'Internet Outage'
+      'internet_outage': 'Internet Outage',
+      'crime': 'Crime Incident',
+      'environment': 'Environmental Hazard',
+      'emergency': 'Emergency Alert'
     };
     
     return typeTitles[incident.type] || `${incident.type} Incident`;
@@ -178,7 +183,10 @@ class GridWatchAPI {
       'power_outage': 'outage',
       'water_main_break': 'outage',
       'gas_leak': 'outage',
-      'internet_outage': 'outage'
+      'internet_outage': 'outage',
+      'crime': 'crime',
+      'environment': 'environment',
+      'emergency': 'emergency'
     };
     
     return categoryMap[incidentType] || 'outage';
@@ -222,6 +230,46 @@ class GridWatchAPI {
     if (severity >= 0.7) return '4h';
     if (severity >= 0.4) return '2h';
     return '1h';
+  }
+
+  /**
+   * Get incident icon based on type
+   */
+  getIncidentIcon(incident) {
+    const iconMap = {
+      'road_closure': '🚧',
+      'accident': '🚗',
+      'congestion': '🚦',
+      'power_outage': '⚡',
+      'water_main_break': '💧',
+      'gas_leak': '🔥',
+      'internet_outage': '📡',
+      'crime': '🚔',
+      'environment': '🌍',
+      'emergency': '🚨'
+    };
+    
+    return iconMap[incident.type] || '⚠️';
+  }
+
+  /**
+   * Get incident color based on type
+   */
+  getIncidentColor(incident) {
+    const colorMap = {
+      'road_closure': '#FF9800',    // Orange
+      'accident': '#FF9800',         // Orange
+      'congestion': '#FF9800',       // Orange
+      'power_outage': '#F44336',     // Red
+      'water_main_break': '#2196F3', // Blue
+      'gas_leak': '#FF5722',         // Deep Orange
+      'internet_outage': '#9C27B0',  // Purple
+      'crime': '#9C27B0',            // Purple
+      'environment': '#4CAF50',      // Green
+      'emergency': '#FF5722'         // Deep Orange
+    };
+    
+    return colorMap[incident.type] || '#757575';
   }
 }
 

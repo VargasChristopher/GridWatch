@@ -5,7 +5,8 @@ from datetime import datetime
 SourceType = Literal["open311","here_incident","here_flow","tweet","news","manual"]
 EventType = Literal[
     "water_main_break","road_closure","lane_restriction","congestion",
-    "power_outage","water_line_break","gas_leak","internet_outage","accident"
+    "power_outage","water_line_break","gas_leak","internet_outage","accident",
+    "crime","environment","emergency"
 ]
 IncidentStatus = Literal["active","resolved","monitoring"]
 ActionStatus = Literal["pending","done"]
