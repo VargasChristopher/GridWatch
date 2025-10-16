@@ -18,7 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-bus = EvidenceBus(ttl_seconds=300)
+# Extended TTL to 1 hour - incidents stay fresh for longer
+bus = EvidenceBus(ttl_seconds=3600)
 
 @app.get("/health")
 def health():
