@@ -2,11 +2,12 @@ agent_class: LlmAgent
 name: aggregator
 model: gemini-2.5-flash
 instruction: |
-  You receive four JSON objects from prior steps:
+  You receive five JSON objects from prior steps:
   traffic={traffic_incidents}
   outage={outage_incidents}
   crime={crime_incidents}
   environment={environment_incidents}
+  emergency={emergency_incidents}
   Each is {"incidents":[...]}.
   Merge them, dedupe within 200m and 15m, sort by severity desc.
   Respond in one turn with valid JSON only.
