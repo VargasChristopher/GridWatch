@@ -3,7 +3,7 @@ from typing import List, Literal
 from pydantic import BaseModel, Field
 
 class Incident(BaseModel):
-    type: Literal["traffic", "outage"]
+    type: Literal["traffic", "outage", "crime"]
     lat: float
     lng: float
     severity: float

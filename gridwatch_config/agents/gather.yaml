@@ -1,6 +1,7 @@
 agent_class: ParallelAgent
 name: gather
-description: "Run traffic & outage in parallel."
+description: "Run traffic, outage & crime in parallel."
 sub_agents:
   - config_path: traffic_agent.yaml
   - config_path: outage_agent.yaml
+  - config_path: crime_agent.yaml
