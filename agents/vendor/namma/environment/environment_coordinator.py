@@ -14,13 +14,13 @@ from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
 from google.genai import types, errors
 
-from sub_agents.police.agent import police_agent
-from sub_agents.news.agent import crime_news_agent
-from sub_agents.social_media.agent import crime_social_agent
+from sub_agents.weather.agent import weather_agent
+from sub_agents.air_quality.agent import air_quality_agent
+from sub_agents.environmental_alerts.agent import environmental_alerts_agent
 import prompt
 
 # Use environment variable or default to gemini-2.5-flash (cheaper, faster)
-MODEL = os.getenv("CRIME_AGENT_MODEL", "gemini-2.5-flash")
+MODEL = os.getenv("ENVIRONMENT_AGENT_MODEL", "gemini-2.5-flash")
 
 warnings.filterwarnings("ignore", message="there are non-text parts in the response:")
 
@@ -28,58 +28,58 @@ logging.getLogger("google.genai").setLevel(logging.ERROR)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-class CrimeIncident(BaseModel):
+class EnvironmentalHazard(BaseModel):
     timestamp: str
     location: str
-    incident_type: str
+    hazard_type: str
     severity: str
     description: str
     source: str
     advice: str
 
-class CrimeDigestOutput(BaseModel):
-    crime_digest: Any = Field(
-        description="Array of crime incidents with timestamp, location, type, severity, etc."
+class EnvironmentDigestOutput(BaseModel):
+    environment_digest: Any = Field(
+        description="Array of environmental hazards and alerts"
     )
 
-    @field_validator("crime_digest", mode="after")
+    @field_validator("environment_digest", mode="after")
     @classmethod
-    def validate_crime_digest(cls, v):
+    def validate_environment_digest(cls, v):
         if isinstance(v, dict):
             return json.dumps(v)
         return str(v)
 
 # Coordinator agent definition
-crime_coordinator = LlmAgent(
-    name="crime_coordinator",
+environment_coordinator = LlmAgent(
+    name="environment_coordinator",
     model=MODEL,
-    description="Aggregates police reports, news, and social feeds for a comprehensive crime and safety snapshot",
-    instruction=prompt.CRIME_COORDINATOR_PROMPT,
-    output_key="crime_digest",
+    description="Aggregates weather alerts, air quality, and environmental hazards for comprehensive environmental monitoring",
+    instruction=prompt.ENVIRONMENT_COORDINATOR_PROMPT,
+    output_key="environment_digest",
     tools=[
-        AgentTool(agent=police_agent),
-        AgentTool(agent=crime_news_agent),
-        AgentTool(agent=crime_social_agent),
+        AgentTool(agent=weather_agent),
+        AgentTool(agent=air_quality_agent),
+        AgentTool(agent=environmental_alerts_agent),
     ],
 )
 
 # Default for `adk run`
-root_agent = crime_coordinator
+root_agent = environment_coordinator
 
 # — Runner setup —
 session_service = InMemorySessionService()
 runner = Runner(
-    agent=crime_coordinator,
-    app_name="crime_monitoring_orchestrator",
+    agent=environment_coordinator,
+    app_name="environment_monitoring_orchestrator",
     session_service=session_service,
 )
 
-async def _run_and_clean(user_input: str) -> CrimeDigestOutput:
+async def _run_and_clean(user_input: str) -> EnvironmentDigestOutput:
     # 1) Create & await a fresh session
     session_id = uuid.uuid4().hex
     await session_service.create_session(
-        app_name="crime_monitoring_orchestrator",
-        user_id="crime_user",
+        app_name="environment_monitoring_orchestrator",
+        user_id="environment_user",
         session_id=session_id,
     )
 
@@ -89,7 +89,7 @@ async def _run_and_clean(user_input: str) -> CrimeDigestOutput:
     # 3) Stream events until final response
     raw_response = None
     async for event in runner.run_async(
-        user_id="crime_user",
+        user_id="environment_user",
         session_id=session_id,
         new_message=content,
     ):
@@ -102,22 +102,22 @@ async def _run_and_clean(user_input: str) -> CrimeDigestOutput:
 
     # 4) Strip markdown fences and parse JSON
     payload = re.sub(r"^```json\n|```", "", raw_response, flags=re.DOTALL)
-    logger.info(f"Crime coordinator response: {payload}")
+    logger.info(f"Environment coordinator response: {payload}")
     
     try:
         payload = json.loads(payload)
     except json.JSONDecodeError:
         logger.error("Failed to parse JSON response")
-        return CrimeDigestOutput(crime_digest=[])
+        return EnvironmentDigestOutput(environment_digest=[])
 
-    return CrimeDigestOutput.model_validate(payload, strict=False)
+    return EnvironmentDigestOutput.model_validate(payload, strict=False)
 
-def get_crime_digest(user_input: str) -> CrimeDigestOutput:
+def get_environment_digest(user_input: str) -> EnvironmentDigestOutput:
     """
-    Synchronous wrapper for getting crime digest.
+    Synchronous wrapper for getting environment digest.
     Args:
-        user_input: Natural language request for crime information
+        user_input: Natural language request for environmental information
     Returns:
-        CrimeDigestOutput containing crime incidents
+        EnvironmentDigestOutput containing environmental hazards and alerts
     """
     return asyncio.run(_run_and_clean(user_input))
