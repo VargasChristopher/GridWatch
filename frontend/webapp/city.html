@@ -1310,15 +1310,20 @@
         incidentMarkers.forEach((m) => map.removeLayer(m));
         incidentMarkers.length = 0;
 
-        // quick demo coords: jitter around city center if none provided
-        const jitter = (v) => v + (Math.random() - 0.5) * 0.04; // ~a few km
         rows.forEach((r, i) => {
-          const lat = r.lat ?? jitter(mapCenter[0]);
-          const lon = r.lon ?? jitter(mapCenter[1]);
-          const m = L.marker([lat, lon])
-            .addTo(map)
-            .bindPopup(`${r.title || r.t}<br><small>${r.where}</small>`);
-          incidentMarkers[i] = m;
+          // Only place markers when we have valid coordinates
+          if (typeof r.lat === "number" && typeof r.lng === "number") {
+            const m = L.marker([r.lat, r.lng])
+              .addTo(map)
+              .bindPopup(`${r.title || r.t}<br><small>${r.where}</small>`);
+            incidentMarkers[i] = m;
+          } else if (typeof r.lat === "number" && typeof r.lon === "number") {
+            // Handle case where longitude is named 'lon' instead of 'lng'
+            const m = L.marker([r.lat, r.lon])
+              .addTo(map)
+              .bindPopup(`${r.title || r.t}<br><small>${r.where}</small>`);
+            incidentMarkers[i] = m;
+          }
         });
       }
 
