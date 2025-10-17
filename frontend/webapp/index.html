@@ -5,10 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>GridWatch</title>
-    <link rel="icon" href="logo.ico" sizes="any" />
+    <link rel="icon" href="/favicon.ico?v=1" type="image/x-icon" sizes="any" />
+    <link rel="apple-touch-icon" href="/Grid_apple.png" sizes="180x180" />
+
     <meta
       name="description"
-      content="GridWatch — an agentic city management system. Search U.S. cities and prepare for future features like alerts and heatmaps."
+      content="GridWatch — an agentic city management system. Search U.S. cities and get results."
     />
 
     <script>
@@ -90,7 +92,7 @@
       .app {
         max-width: 1080px;
         margin: 0 auto;
-        padding: 28px 20px 48px;
+        padding: 24px 20px 48px;
 
         /* Center the whole block (header + search) in the viewport */
         min-height: 100svh; /* use full viewport height */
@@ -728,13 +730,25 @@
 
       /* Keep content clear of the fixed theme toggle on small screens */
       @media (max-width: 640px) {
-        .wrap {
+        .app {
           padding-top: 64px;
         }
       }
+
+      /* Lock page scrolling on the home page */
+      html,
+      body {
+        height: 100%;
+        overflow: hidden; /* no page scroll */
+        overscroll-behavior: none; /* stop iOS/macOS bounce */
+      }
+
+      /* Keep the centered layout filling the viewport */
+      .app {
+        min-height: 100dvh; /* dynamic vh to avoid iOS toolbar jumps */
+      }
     </style>
     <link rel="preload" as="image" href="Grid.png" type="image/png" />
-    <link rel="apple-touch-icon" href="Grid_apple.png" sizes="180x180" />
   </head>
 
   <body>
