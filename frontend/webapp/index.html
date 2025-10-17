@@ -540,98 +540,6 @@
         }
       }
 
-      /* ===== Clean print styles (mobile & desktop) ===== */
-      @media print {
-        :root {
-          color-scheme: light;
-        }
-
-        html,
-        body {
-          background: #fff !important;
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-
-        /* kill the dark grid/background layers */
-        body::before {
-          display: none !important;
-        }
-
-        /* hide interactive chrome */
-        #backBtn,
-        #printBtn,
-        .btn,
-        .leaflet-control-container {
-          display: none !important;
-        }
-
-        .theme-toggle {
-          display: none !important;
-        }
-
-        /* flatten containers/cards */
-        .panel,
-        .card {
-          background: #fff !important;
-          box-shadow: none !important;
-          border: 1px solid #e5e5e5 !important;
-        }
-
-        /* map prints at a sane height, no dark fill */
-        #map,
-        .leaflet-container {
-          height: 320px !important;
-          background: #fff !important;
-        }
-
-        /* layout + typography tuned for paper */
-        .container,
-        main {
-          max-width: none !important;
-          padding: 0 !important;
-        }
-        body {
-          font-size: 12pt !important;
-        }
-        h1 {
-          font-size: 18pt !important;
-          margin: 0 0 6pt;
-        }
-        h2 {
-          font-size: 14pt !important;
-          margin: 12pt 0 6pt;
-          break-after: avoid;
-        }
-
-        .grid,
-        .metrics {
-          display: grid !important;
-          gap: 8pt;
-        }
-        .metrics {
-          grid-template-columns: repeat(3, 1fr) !important;
-        }
-
-        /* keep cards/rows together across page breaks */
-        .card,
-        .stat,
-        .incident {
-          break-inside: avoid;
-          page-break-inside: avoid;
-        }
-
-        /* don’t dump raw link URLs after anchors */
-        a[href]:after {
-          content: "";
-        }
-      }
-
-      /* printer margins */
-      @page {
-        margin: 12mm;
-      }
-
       /* ---- Theme overrides (wins over prefers-color-scheme) ---- */
       :root[data-theme="light"] {
         color-scheme: light;
@@ -674,6 +582,18 @@
 
         --sub-fg: #3a3a3a;
       }
+      /* Soften top-left vignette in LIGHT MODE */
+      :root[data-theme="light"] body {
+        background: radial-gradient(
+            1400px 800px at 10% -10%,
+            rgba(0, 0, 0, 0.08) 0%,
+            rgba(0, 0, 0, 0.035) 42%,
+            rgba(0, 0, 0, 0) 78%
+          ),
+          var(--bg);
+        background-repeat: no-repeat;
+      }
+
       :root[data-theme="dark"] {
         color-scheme: dark;
 
@@ -757,6 +677,108 @@
       }
       html[data-theme="dark"] .theme-toggle .moon {
         display: inline;
+      }
+
+      /* ===== Print styles shared by index.html and city.html ===== */
+      @media print {
+        /* Page box and margins (tweak if you prefer) */
+        @page {
+          size: auto; /* let the browser/OS pick paper size */
+          margin: 12mm; /* comfortable default for A4/Letter */
+        }
+
+        /* Preserve on-screen colors and backgrounds as closely as possible */
+        html,
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact; /* hint: keep colors as authored */
+          background: var(--bg) !important; /* uses your light/dark tokens */
+          color: var(--text) !important;
+          background-attachment: scroll !important; /* avoid fixed artifacts */
+        }
+
+        /* Your faint grid/vignette underlay */
+        body::before {
+          background-attachment: scroll, scroll, scroll, scroll !important;
+          opacity: 0.45; /* subtle so text stays readable on paper */
+        }
+
+        /* Remove “screen only” chrome */
+        #themeToggle,
+        #dock,
+        #printBtn,
+        #backBtn,
+        .btn {
+          /* generic action buttons */
+          display: none !important;
+        }
+
+        /* Layout: make single column so cards don’t get split */
+        .wrap,
+        .app,
+        main,
+        section,
+        .search-card {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+        main,
+        .grid,
+        .metrics {
+          display: block !important; /* stack everything */
+        }
+
+        /* Cards/panels look like on screen but without heavy shadows */
+        .panel,
+        .card,
+        .stat,
+        .results,
+        #map {
+          background: var(--card) !important;
+          border: 1px solid var(--border) !important;
+          box-shadow: none !important;
+        }
+
+        /* Leaflet map: keep tiles visible and sensible height on paper */
+        .leaflet-container {
+          background: var(--card) !important;
+        }
+        .leaflet-container img {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        #map {
+          height: 320px !important;
+        }
+
+        /* Avoid awkward page breaks */
+        header,
+        h1,
+        h2,
+        h3 {
+          break-after: avoid;
+        }
+        .panel,
+        .card,
+        .grid,
+        .metrics,
+        .stat,
+        #incidentsCard,
+        ul.clean li {
+          break-inside: avoid; /* modern */
+          page-break-inside: avoid; /* legacy fallback */
+        }
+
+        /* Links print as normal text (keeps the “same as screen” look) */
+        a {
+          text-decoration: none;
+          color: var(--text) !important;
+        }
+
+        /* Tighter spacing for paper */
+        .wrap {
+          padding: 12px 8px 18px !important;
+        }
       }
     </style>
     <link rel="preload" as="image" href="/Grid.png" type="image/png" />
