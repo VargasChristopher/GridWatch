@@ -9,7 +9,8 @@
       content="City-specific dashboard for GridWatch with map, incidents, and subsystem panels."
     />
 
-    <link rel="icon" href="/logo.ico" sizes="any" />
+    <link rel="icon" href="logo.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="Grid_apple.png" sizes="180x180" />
     <meta name="color-scheme" content="light dark" />
 
     <script>
@@ -29,6 +30,22 @@
           if (m) m.content = theme === "dark" ? "dark light" : "light dark";
         } catch {}
       })();
+    </script>
+
+    <script>
+      /* Follow system theme changes when user hasn't chosen a theme */
+      try {
+        const media = matchMedia("(prefers-color-scheme: dark)");
+        if (!localStorage.getItem("gw:theme")) {
+          media.addEventListener("change", (e) => {
+            const theme = e.matches ? "dark" : "light";
+            const root = document.documentElement;
+            root.dataset.theme = theme;
+            const m = document.querySelector('meta[name="color-scheme"]');
+            if (m) m.content = theme === "dark" ? "dark light" : "light dark";
+          });
+        }
+      } catch {}
     </script>
 
     <style>
@@ -312,12 +329,7 @@
 
       /* Apply variables to existing blocks */
       body {
-        background: radial-gradient(
-            1600px 1000px at 12% -25%,
-            #1a1a1a 0%,
-            rgba(237, 237, 237, 0.6) 45%,
-            rgba(237, 237, 237, 0) 85%
-          ),
+        background: radial-gradient(1600px 1000px at 12% -25%, #1a1a1a 0%),
           var(--bg);
         color: var(--text);
         background-repeat: no-repeat !important;
@@ -376,14 +388,15 @@
         color: var(--sev-low-tx);
       }
       @media (prefers-color-scheme: light) {
-        body {
+        html:not([data-theme]) body {
           background: radial-gradient(
-              1800px 1200px at -10% -25%,
-              #1a1a1a 0%,
-              rgba(237, 237, 237, 0.6) 45%,
-              rgba(237, 237, 237, 0) 85%
+              1400px 800px at 10% -10%,
+              rgba(0, 0, 0, 0.08) 0%,
+              rgba(0, 0, 0, 0.035) 42%,
+              rgba(0, 0, 0, 0) 78%
             ),
             var(--bg);
+          background-repeat: no-repeat;
         }
       }
       /* keep the bar off the very edges + respect the iOS home bar */
@@ -559,12 +572,7 @@
       /* Keep light scheme consistent */
       @media (orientation: landscape) and (pointer: coarse) and (prefers-color-scheme: light) {
         body {
-          background-image: radial-gradient(
-              200% 160% at 12% -35%,
-              #1a1a1a 0%,
-              rgba(237, 237, 237, 0.6) 45%,
-              rgba(237, 237, 237, 0) 85%
-            ),
+          background-image: radial-gradient(200% 160% at 12% -35%, #1a1a1a 0%),
             var(--bg) !important;
         }
       }
@@ -614,10 +622,10 @@
       /* Soften top-left vignette in LIGHT MODE */
       :root[data-theme="light"] body {
         background: radial-gradient(
-            1600px 1000px at 12% -25%,
-            rgba(0, 0, 0, 0.1) 0%,
-            rgba(0, 0, 0, 0.045) 45%,
-            rgba(0, 0, 0, 0) 85%
+            1400px 800px at 10% -10%,
+            rgba(0, 0, 0, 0.08) 0%,
+            rgba(0, 0, 0, 0.035) 42%,
+            rgba(0, 0, 0, 0) 78%
           ),
           var(--bg);
         background-repeat: no-repeat;
@@ -710,106 +718,82 @@
         display: inline;
       }
 
-      /* ===== Print styles shared by index.html and city.html ===== */
       @media print {
-        /* Page box and margins (tweak if you prefer) */
-        @page {
-          size: auto; /* let the browser/OS pick paper size */
-          margin: 12mm; /* comfortable default for A4/Letter */
-        }
-
-        /* Preserve on-screen colors and backgrounds as closely as possible */
-        html,
-        body {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact; /* hint: keep colors as authored */
-          background: var(--bg) !important; /* uses your light/dark tokens */
-          color: var(--text) !important;
-          background-attachment: scroll !important; /* avoid fixed artifacts */
-        }
-
-        /* Your faint grid/vignette underlay */
-        body::before {
-          background-attachment: scroll, scroll, scroll, scroll !important;
-          opacity: 0.45; /* subtle so text stays readable on paper */
-        }
-
-        /* Remove “screen only” chrome */
-        #themeToggle,
-        #dock,
-        #printBtn,
-        #backBtn,
-        .btn {
-          /* generic action buttons */
+        /* Hide the toggle dark/light mode */
+        .theme-toggle {
           display: none !important;
         }
 
-        /* Layout: make single column so cards don’t get split */
-        .wrap,
-        .app,
-        main,
-        section,
-        .search-card {
-          width: 100% !important;
-          max-width: 100% !important;
-        }
-        main,
-        .grid,
-        .metrics {
-          display: block !important; /* stack everything */
-        }
-
-        /* Cards/panels look like on screen but without heavy shadows */
-        .panel,
-        .card,
-        .stat,
-        .results,
-        #map {
-          background: var(--card) !important;
-          border: 1px solid var(--border) !important;
-          box-shadow: none !important;
-        }
-
-        /* Leaflet map: keep tiles visible and sensible height on paper */
-        .leaflet-container {
-          background: var(--card) !important;
-        }
-        .leaflet-container img {
+        /* Show Grid.png in a small rounded square */
+        .logo {
+          width: 24px;
+          height: 24px;
+          border-radius: 6px;
+          background: none !important; /* disable background fallback */
+          position: relative;
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }
-        #map {
-          height: 320px !important;
+        .logo::before {
+          content: "";
+          display: block;
+          width: 24px;
+          height: 24px;
+          border-radius: 6px;
+          background-image: url("Grid.png") !important;
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
 
-        /* Avoid awkward page breaks */
-        header,
-        h1,
-        h2,
-        h3 {
-          break-after: avoid;
+        /* Hide the navigation doc */
+        #dock {
+          display: none !important;
         }
-        .panel,
-        .card,
-        .grid,
-        .metrics,
-        .stat,
-        #incidentsCard,
-        ul.clean li {
-          break-inside: avoid; /* modern */
-          page-break-inside: avoid; /* legacy fallback */
-        }
+      }
 
-        /* Links print as normal text (keeps the “same as screen” look) */
-        a {
-          text-decoration: none;
-          color: var(--text) !important;
-        }
+      /* Base (dark) like index.html */
+      body {
+        background: radial-gradient(
+            1200px 600px at 10% -10%,
+            #1a1a1a,
+            transparent
+          ),
+          var(--bg);
+        background-repeat: no-repeat;
+      }
 
-        /* Tighter spacing for paper */
-        .wrap {
-          padding: 12px 8px 18px !important;
+      /* Explicit light theme (matches index.html exactly) */
+      :root[data-theme="light"] body {
+        background: radial-gradient(
+            1400px 800px at 10% -10%,
+            rgba(0, 0, 0, 0.08) 0%,
+            rgba(0, 0, 0, 0.035) 42%,
+            rgba(0, 0, 0, 0) 78%
+          ),
+          var(--bg);
+        background-repeat: no-repeat;
+      }
+
+      /* Honor OS light mode when no explicit theme is set */
+      @media (prefers-color-scheme: light) {
+        html:not([data-theme]) body {
+          background: radial-gradient(
+              1400px 800px at 10% -10%,
+              rgba(0, 0, 0, 0.08) 0%,
+              rgba(0, 0, 0, 0.035) 42%,
+              rgba(0, 0, 0, 0) 78%
+            ),
+            var(--bg);
+          background-repeat: no-repeat;
         }
+      }
+
+      /* Safety: ensure the page base color is identical behind everything */
+      html {
+        background-color: var(--bg);
       }
     </style>
     <link
@@ -824,7 +808,7 @@
       crossorigin
     ></script>
     <script src="/js/api.js?v=2"></script>
-    <link rel="preload" as="image" href="/Grid.png" type="image/png" />
+    <link rel="preload" as="image" href="Grid.png" type="image/png" />
     <link
       rel="apple-touch-icon"
       href="/Grid_apple.png"

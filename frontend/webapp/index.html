@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>GridWatch</title>
-    <link rel="icon" href="/logo.ico" sizes="any" />
+    <link rel="icon" href="logo.ico" sizes="any" />
     <meta
       name="description"
       content="GridWatch — an agentic city management system. Search U.S. cities and prepare for future features like alerts and heatmaps."
@@ -28,6 +28,22 @@
           if (m) m.content = theme === "dark" ? "dark light" : "light dark";
         } catch {}
       })();
+    </script>
+
+    <script>
+      /* Follow system theme changes when user hasn't chosen a theme */
+      try {
+        const media = matchMedia("(prefers-color-scheme: dark)");
+        if (!localStorage.getItem("gw:theme")) {
+          media.addEventListener("change", (e) => {
+            const theme = e.matches ? "dark" : "light";
+            const root = document.documentElement;
+            root.dataset.theme = theme;
+            const m = document.querySelector('meta[name="color-scheme"]');
+            if (m) m.content = theme === "dark" ? "dark light" : "light dark";
+          });
+        }
+      } catch {}
     </script>
 
     <style>
@@ -679,115 +695,46 @@
         display: inline;
       }
 
-      /* ===== Print styles shared by index.html and city.html ===== */
       @media print {
-        /* Page box and margins (tweak if you prefer) */
-        @page {
-          size: auto; /* let the browser/OS pick paper size */
-          margin: 12mm; /* comfortable default for A4/Letter */
-        }
-
-        /* Preserve on-screen colors and backgrounds as closely as possible */
-        html,
-        body {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact; /* hint: keep colors as authored */
-          background: var(--bg) !important; /* uses your light/dark tokens */
-          color: var(--text) !important;
-          background-attachment: scroll !important; /* avoid fixed artifacts */
-        }
-
-        /* Your faint grid/vignette underlay */
-        body::before {
-          background-attachment: scroll, scroll, scroll, scroll !important;
-          opacity: 0.45; /* subtle so text stays readable on paper */
-        }
-
-        /* Remove “screen only” chrome */
-        #themeToggle,
-        #dock,
-        #printBtn,
-        #backBtn,
-        .btn {
-          /* generic action buttons */
+        /* Hide the toggle dark/light mode */
+        .theme-toggle {
           display: none !important;
         }
 
-        /* Layout: make single column so cards don’t get split */
-        .wrap,
-        .app,
-        main,
-        section,
-        .search-card {
-          width: 100% !important;
-          max-width: 100% !important;
-        }
-        main,
-        .grid,
-        .metrics {
-          display: block !important; /* stack everything */
-        }
-
-        /* Cards/panels look like on screen but without heavy shadows */
-        .panel,
-        .card,
-        .stat,
-        .results,
-        #map {
-          background: var(--card) !important;
-          border: 1px solid var(--border) !important;
-          box-shadow: none !important;
-        }
-
-        /* Leaflet map: keep tiles visible and sensible height on paper */
-        .leaflet-container {
-          background: var(--card) !important;
-        }
-        .leaflet-container img {
+        /* Show Grid.png in a small rounded square */
+        .logo {
+          width: 24px;
+          height: 24px;
+          border-radius: 6px;
+          background: none !important; /* disable background fallback */
+          position: relative;
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }
-        #map {
-          height: 320px !important;
+        .logo::before {
+          content: "";
+          display: block;
+          width: 24px;
+          height: 24px;
+          border-radius: 6px;
+          background-image: url("Grid.png") !important;
+          background-size: cover;
+          background-position: center;
+          background-repeat: no-repeat;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
+      }
 
-        /* Avoid awkward page breaks */
-        header,
-        h1,
-        h2,
-        h3 {
-          break-after: avoid;
-        }
-        .panel,
-        .card,
-        .grid,
-        .metrics,
-        .stat,
-        #incidentsCard,
-        ul.clean li {
-          break-inside: avoid; /* modern */
-          page-break-inside: avoid; /* legacy fallback */
-        }
-
-        /* Links print as normal text (keeps the “same as screen” look) */
-        a {
-          text-decoration: none;
-          color: var(--text) !important;
-        }
-
-        /* Tighter spacing for paper */
+      /* Keep content clear of the fixed theme toggle on small screens */
+      @media (max-width: 640px) {
         .wrap {
-          padding: 12px 8px 18px !important;
+          padding-top: 64px;
         }
       }
     </style>
-    <link rel="preload" as="image" href="/Grid.png" type="image/png" />
-    <link
-      rel="apple-touch-icon"
-      href="/Grid_apple.png"
-      sizes="180x180"
-      type="image/png"
-    />
+    <link rel="preload" as="image" href="Grid.png" type="image/png" />
+    <link rel="apple-touch-icon" href="Grid_apple.png" sizes="180x180" />
   </head>
 
   <body>
