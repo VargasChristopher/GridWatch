@@ -12,6 +12,25 @@
     <link rel="icon" href="/logo.ico" sizes="any" />
     <meta name="color-scheme" content="light dark" />
 
+    <script>
+      /* GridWatch theme boot: apply saved theme ASAP to avoid FOUC */
+      (() => {
+        try {
+          const saved = localStorage.getItem("gw:theme"); // "light" | "dark" | null
+          const prefersDark = matchMedia(
+            "(prefers-color-scheme: dark)"
+          ).matches;
+          const theme = saved || (prefersDark ? "dark" : "light");
+          const root = document.documentElement;
+          root.dataset.theme = theme;
+
+          // Keep UA widgets (form controls/scrollbars) in sync
+          const m = document.querySelector('meta[name="color-scheme"]');
+          if (m) m.content = theme === "dark" ? "dark light" : "light dark";
+        } catch {}
+      })();
+    </script>
+
     <style>
       :root {
         --bg: #f6f7f8;
@@ -55,6 +74,12 @@
         margin: 0 auto;
         padding: 24px 20px 48px;
       }
+      /* Keep content clear of the fixed theme toggle on small screens */
+      @media (max-width: 640px) {
+        .wrap {
+          padding-top: 64px;
+        }
+      }
       header {
         display: flex;
         align-items: center;
@@ -86,7 +111,7 @@
         letter-spacing: 0.2px;
       }
       .sub {
-        color: var(--muted);
+        color: var(--sub-fg);
         font-size: 13px;
       }
 
@@ -254,6 +279,8 @@
         --sev-low-bg: rgba(16, 185, 129, 0.1);
         --sev-low-bd: #2ea37d;
         --sev-low-tx: #0f5132;
+
+        --sub-fg: var(--muted); /* default */
       }
 
       @media (prefers-color-scheme: dark) {
@@ -321,9 +348,11 @@
       ul.clean li {
         border-bottom: 1px solid var(--line);
       }
-      .muted,
-      .sub {
+      .muted {
         color: var(--muted);
+      }
+      .sub {
+        color: var(--sub-fg);
       }
 
       .badge {
@@ -566,6 +595,10 @@
           display: none !important;
         }
 
+        .theme-toggle {
+          display: none !important;
+        }
+
         /* flatten containers/cards */
         .panel,
         .card {
@@ -634,6 +667,135 @@
       @page {
         margin: 12mm;
       }
+
+      /* ---- Theme overrides (wins over prefers-color-scheme) ---- */
+      :root[data-theme="light"] {
+        color-scheme: light;
+
+        /* base tokens (light) */
+        --bg: #f6f7f8;
+        --panel: #fff;
+        --panel-2: #f2f2f2;
+        --border: #d9d9d9;
+        --muted: #6b6b6b;
+        --text: #111;
+        --accent: #bdbdbd;
+        --accent-2: #7a7a7a;
+        --shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+        /* extras used across pages */
+        --card: #fff;
+        --line: #e7e7e7;
+        --field: #fff;
+        --hover: #f5f5f5;
+        --chip-bg: #f2f2f2;
+        --scroll-track: #f0f0f0;
+        --scroll-thumb: #ccc;
+        --btn-secondary-bg: var(--card);
+        --btn-secondary-fg: var(--text);
+
+        /* severity chips (light) */
+        --sev-hi-bg: rgba(255, 59, 48, 0.08);
+        --sev-hi-bd: #ff3b30;
+        --sev-hi-tx: #b3261e;
+        --sev-med-bg: rgba(255, 186, 0, 0.1);
+        --sev-med-bd: #f2a60c;
+        --sev-med-tx: #7a5800;
+        --sev-low-bg: rgba(16, 185, 129, 0.1);
+        --sev-low-bd: #2ea37d;
+        --sev-low-tx: #0f5132;
+
+        /* faint grid (light) */
+        --grid-line: rgba(0, 0, 0, 0.025);
+        --grid-major-line: rgba(0, 0, 0, 0.045);
+
+        --sub-fg: #3a3a3a; /* darker for visibility in light mode */
+      }
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+
+        /* base tokens (dark) */
+        --bg: #0b0b0c;
+        --panel: #121212;
+        --panel-2: #1a1a1a;
+        --border: #2a2a2a;
+        --muted: #9a9a9a;
+        --text: #f3f3f3;
+        --accent: #bdbdbd;
+        --accent-2: #7a7a7a;
+        --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+
+        /* extras used across pages */
+        --card: #111;
+        --line: #262626;
+        --field: #111;
+        --hover: #1b1b1b;
+        --chip-bg: #161616;
+        --scroll-track: #141414;
+        --scroll-thumb: #343434;
+        --btn-secondary-bg: #141414;
+        --btn-secondary-fg: #f3f3f3;
+
+        /* severity chips (dark) */
+        --sev-hi-bg: rgba(255, 88, 88, 0.1);
+        --sev-hi-bd: #6b1a1a;
+        --sev-hi-tx: #ff8f8f;
+        --sev-med-bg: rgba(255, 200, 88, 0.08);
+        --sev-med-bd: #5b481a;
+        --sev-med-tx: #ffd890;
+        --sev-low-bg: rgba(100, 240, 180, 0.08);
+        --sev-low-bd: #2a5b4a;
+        --sev-low-tx: #9bf3cf;
+
+        /* faint grid (dark) */
+        --grid-line: rgba(255, 255, 255, 0.02);
+        --grid-major-line: rgba(255, 255, 255, 0.04);
+
+        --sub-fg: var(--muted); /* same as current */
+      }
+
+      /* Keep the background consistent when user overrides system */
+      html[data-theme="light"] body {
+        background-attachment: scroll, scroll, scroll, scroll;
+      }
+      html[data-theme="dark"] body {
+        background-attachment: scroll, scroll, scroll, scroll;
+      }
+
+      /* ---- Toggle button (top-right, on every page) ---- */
+      .theme-toggle {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 2000;
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        display: grid;
+        place-items: center;
+        background: var(--card);
+        color: var(--text);
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow);
+        cursor: pointer;
+      }
+      .theme-toggle:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(122, 168, 255, 0.35);
+      }
+
+      /* Swap icon based on theme */
+      .theme-toggle .sun {
+        display: inline;
+      }
+      .theme-toggle .moon {
+        display: none;
+      }
+      html[data-theme="dark"] .theme-toggle .sun {
+        display: none;
+      }
+      html[data-theme="dark"] .theme-toggle .moon {
+        display: inline;
+      }
     </style>
     <link
       rel="stylesheet"
@@ -655,7 +817,19 @@
       type="image/png"
     />
   </head>
+
   <body>
+    <button
+      id="themeToggle"
+      class="theme-toggle"
+      type="button"
+      aria-label="Toggle dark mode"
+      aria-pressed="false"
+    >
+      <span class="sun" aria-hidden="true">☀️</span>
+      <span class="moon" aria-hidden="true">🌙</span>
+    </button>
+
     <div class="wrap">
       <header>
         <div class="brand">
@@ -982,7 +1156,6 @@
           maxZoom: 19,
           attribution: "&copy; OpenStreetMap",
         }).addTo(map);
-        marker = L.marker(center).addTo(map).bindPopup(cityName).openPopup();
         setTimeout(() => map?.invalidateSize(), 50);
       }
 
@@ -1432,7 +1605,6 @@
             }
           });
 
-          L.marker(center).addTo(map).bindPopup(cityName).openPopup();
           setTimeout(() => map.invalidateSize(), 50);
         } catch (err) {
           console.warn("Map boot failed:", err);
@@ -1460,6 +1632,34 @@
         } catch (err) {
           console.warn("renderIncidents failed:", err);
         }
+      })();
+
+      (() => {
+        const btn = document.getElementById("themeToggle");
+        if (!btn) return;
+
+        const root = document.documentElement;
+        const get = () =>
+          root.dataset.theme ||
+          (matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+
+        function apply(theme) {
+          root.dataset.theme = theme;
+          localStorage.setItem("gw:theme", theme);
+          // keep UA chrome consistent
+          const m = document.querySelector('meta[name="color-scheme"]');
+          if (m) m.content = theme === "dark" ? "dark light" : "light dark";
+          btn.setAttribute("aria-pressed", String(theme === "dark"));
+        }
+
+        btn.addEventListener("click", () => {
+          apply(get() === "dark" ? "light" : "dark");
+        });
+
+        // Init button state (in case boot script ran before button existed)
+        apply(localStorage.getItem("gw:theme") || get());
       })();
     </script>
   </body>
