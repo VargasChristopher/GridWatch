@@ -480,6 +480,130 @@
       .option .view-btn {
         box-shadow: var(--shadow-soft);
       }
+
+      /* --- Mobile landscape seam fix (applies to iOS & Android) --- */
+      @media (orientation: landscape) and (pointer: coarse) {
+        /* 1) Don't use fixed-attachment grids on mobile landscape */
+        body::before {
+          background-attachment: scroll, scroll, scroll, scroll !important;
+          /* (optional) slightly softer look on smaller screens */
+          opacity: 0.35;
+        }
+
+        /* 2) Make the radial halo much larger so its fade never cuts off on screen */
+        body {
+          background-image: radial-gradient(
+              200% 160% at 12% -35%,
+              #1a1a1a 0%,
+              rgba(26, 26, 26, 0.55) 45%,
+              rgba(26, 26, 26, 0) 85%
+            ),
+            var(--bg) !important;
+          background-repeat: no-repeat !important;
+          background-attachment: scroll !important;
+        }
+      }
+
+      /* Keep light scheme consistent */
+      @media (orientation: landscape) and (pointer: coarse) and (prefers-color-scheme: light) {
+        body {
+          background-image: radial-gradient(
+              200% 160% at 12% -35%,
+              #1a1a1a 0%,
+              rgba(237, 237, 237, 0.6) 45%,
+              rgba(237, 237, 237, 0) 85%
+            ),
+            var(--bg) !important;
+        }
+      }
+
+      /* ===== Clean print styles (mobile & desktop) ===== */
+      @media print {
+        :root {
+          color-scheme: light;
+        }
+
+        html,
+        body {
+          background: #fff !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+
+        /* kill the dark grid/background layers */
+        body::before {
+          display: none !important;
+        }
+
+        /* hide interactive chrome */
+        #backBtn,
+        #printBtn,
+        .btn,
+        .leaflet-control-container {
+          display: none !important;
+        }
+
+        /* flatten containers/cards */
+        .panel,
+        .card {
+          background: #fff !important;
+          box-shadow: none !important;
+          border: 1px solid #e5e5e5 !important;
+        }
+
+        /* map prints at a sane height, no dark fill */
+        #map,
+        .leaflet-container {
+          height: 320px !important;
+          background: #fff !important;
+        }
+
+        /* layout + typography tuned for paper */
+        .container,
+        main {
+          max-width: none !important;
+          padding: 0 !important;
+        }
+        body {
+          font-size: 12pt !important;
+        }
+        h1 {
+          font-size: 18pt !important;
+          margin: 0 0 6pt;
+        }
+        h2 {
+          font-size: 14pt !important;
+          margin: 12pt 0 6pt;
+          break-after: avoid;
+        }
+
+        .grid,
+        .metrics {
+          display: grid !important;
+          gap: 8pt;
+        }
+        .metrics {
+          grid-template-columns: repeat(3, 1fr) !important;
+        }
+
+        /* keep cards/rows together across page breaks */
+        .card,
+        .stat,
+        .incident {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+
+        /* don’t dump raw link URLs after anchors */
+        a[href]:after {
+          content: "";
+        }
+      }
+
+      /* printer margins */
+      @page {
+        margin: 12mm;
+      }
     </style>
     <link rel="preload" as="image" href="/Grid.png" type="image/png" />
     <link
