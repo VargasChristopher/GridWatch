@@ -61,6 +61,21 @@ def verify_and_score(inc_type: str, cluster: List[Evidence]) -> Dict:
             {"step": "Dispatch EMS/Police", "owner": "EMS", "priority": 1, "status": "pending"},
             {"step": "Place cones / reroute", "owner": "Traffic", "priority": 2, "status": "pending"},
         ]
+    elif inc_type == "crime":
+        actions = [
+            {"step": "Dispatch Police", "owner": "Police", "priority": 1, "status": "pending"},
+            {"step": "Secure area if needed", "owner": "Police", "priority": 2, "status": "pending"},
+        ]
+    elif inc_type == "environment":
+        actions = [
+            {"step": "Issue public advisory", "owner": "Emergency Management", "priority": 1, "status": "pending"},
+            {"step": "Monitor conditions", "owner": "Environmental", "priority": 2, "status": "pending"},
+        ]
+    elif inc_type == "emergency":
+        actions = [
+            {"step": "Activate emergency response", "owner": "Emergency Management", "priority": 1, "status": "pending"},
+            {"step": "Notify relevant agencies", "owner": "Emergency Management", "priority": 1, "status": "pending"},
+        ]
 
     return {
         "confidence": confidence,
@@ -80,7 +95,10 @@ def summary_for(inc_type: str, v: Dict) -> str:
         "water_line_break": "Water line break reported.",
         "gas_leak": "Gas leak reported.",
         "internet_outage": "Internet outage reported.",
-        "accident": "Traffic accident reported."
+        "accident": "Traffic accident reported.",
+        "crime": "Crime incident reported.",
+        "environment": "Environmental hazard detected.",
+        "emergency": "Emergency alert issued."
     }.get(inc_type, "Incident detected.")
     
     # Check if impact exists and has eta_delta_min
