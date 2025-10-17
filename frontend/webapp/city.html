@@ -653,6 +653,18 @@
         "emergency",
       ]);
 
+      // Keep only incidents that fall inside the current map view (the selected city)
+      function incidentsInCurrentCity(rows) {
+        if (!map) return rows || [];
+        const b = map.getBounds();
+        return (rows || []).filter(
+          (r) =>
+            Number.isFinite(r?.lat) &&
+            Number.isFinite(r?.lng) &&
+            b.contains([r.lat, r.lng])
+        );
+      }
+
       function labelFor(id) {
         const s =
           typeof SUBSYSTEMS !== "undefined" && Array.isArray(SUBSYSTEMS)
@@ -1197,37 +1209,34 @@
       const _renderIncidents = renderIncidents;
       renderIncidents = function (rows) {
         try {
-          // Remember the full set given to us; tag each with a category if not present
-          allIncidents = (rows || []).map((r) =>
+          // 1) limit to the selected city's map bounds
+          const inCity = incidentsInCurrentCity(rows);
+
+          // 2) remember the full (last fetched) set we received from backend
+          allIncidents = (inCity || []).map((r) =>
             r && typeof r === "object"
               ? { ...r, cat: r.cat || inferCategory(r) }
               : r
           );
 
+          // 3) apply the dock/category filter (traffic, outage, etc.)
           const toShow = activeFilter
             ? allIncidents.filter((r) => r && r.cat === activeFilter)
             : allIncidents;
 
+          // 4) draw list + map markers only for the filtered set
           _renderIncidents(toShow);
           placeIncidentMarkers(toShow);
 
-          // Rebind “ping” for the filtered list
-          [...document.querySelectorAll("#incidentsList li")].forEach(
-            (li, i) => {
-              li.onclick = () => pingIncident(i);
-            }
-          );
+          // keep “ping” bindings in sync with the filtered list
+          document.querySelectorAll("#incidentsList li").forEach((li, i) => {
+            li.onclick = () => pingIncident(i);
+          });
 
           updateIncidentsUIExtras(toShow);
         } catch (e) {
-          // Safe fallback
           _renderIncidents(rows || []);
           placeIncidentMarkers(rows || []);
-          [...document.querySelectorAll("#incidentsList li")].forEach(
-            (li, i) => {
-              li.onclick = () => pingIncident(i);
-            }
-          );
         }
       };
 
@@ -1257,6 +1266,12 @@
             maxZoom: 19,
             attribution: "© OpenStreetMap contributors",
           }).addTo(map);
+
+          map.on("moveend zoomend", () => {
+            if (Array.isArray(allIncidents) && allIncidents.length) {
+              renderIncidents(allIncidents);
+            }
+          });
 
           L.marker(center).addTo(map).bindPopup(cityName).openPopup();
           setTimeout(() => map.invalidateSize(), 50);
