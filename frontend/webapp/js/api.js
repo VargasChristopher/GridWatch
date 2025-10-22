@@ -26,11 +26,12 @@ class GridWatchAPI {
   /**
    * Fetch incidents from backend
    */
-  async getIncidents(limit = 20, since = null) {
+  async getIncidents(limit = 20, since = null, city = null) {
     try {
       const params = new URLSearchParams();
       if (limit) params.append('limit', limit);
       if (since) params.append('since', since);
+      if (city) params.append('city', city);
       
       const url = `${this.baseURL}/incidents${params.toString() ? '?' + params.toString() : ''}`;
       const response = await fetch(url);
@@ -196,7 +197,6 @@ class GridWatchAPI {
    * Get location description
    */
   getLocationDescription(incident) {
-    // For Washington, DC area, provide more meaningful locations
     const lat = incident.lat;
     const lng = incident.lng;
     
@@ -214,6 +214,103 @@ class GridWatchAPI {
         return "Northeast DC";
       } else {
         return "Washington, DC";
+      }
+    }
+    
+    // New York, NY area landmarks
+    if (lat >= 40.6 && lat <= 40.9 && lng >= -74.3 && lng <= -73.7) {
+      if (lat >= 40.7 && lat <= 40.8 && lng >= -74.0 && lng <= -73.9) {
+        return "Manhattan";
+      } else if (lat >= 40.6 && lat <= 40.7 && lng >= -74.0 && lng <= -73.9) {
+        return "Brooklyn";
+      } else if (lat >= 40.6 && lat <= 40.8 && lng >= -74.1 && lng <= -73.9) {
+        return "Queens";
+      } else if (lat >= 40.8 && lat <= 40.9 && lng >= -74.0 && lng <= -73.9) {
+        return "Bronx";
+      } else {
+        return "New York, NY";
+      }
+    }
+    
+    // Los Angeles, CA area landmarks
+    if (lat >= 33.7 && lat <= 34.3 && lng >= -118.7 && lng <= -118.1) {
+      if (lat >= 34.0 && lat <= 34.1 && lng >= -118.3 && lng <= -118.2) {
+        return "Downtown LA";
+      } else if (lat >= 34.0 && lat <= 34.1 && lng >= -118.5 && lng <= -118.4) {
+        return "Beverly Hills";
+      } else if (lat >= 33.8 && lat <= 34.2 && lng >= -118.4 && lng <= -118.1) {
+        return "Hollywood";
+      } else if (lat >= 33.9 && lat <= 34.1 && lng >= -118.6 && lng <= -118.3) {
+        return "Santa Monica";
+      } else {
+        return "Los Angeles, CA";
+      }
+    }
+    
+    // Chicago, IL area landmarks
+    if (lat >= 41.6 && lat <= 42.1 && lng >= -87.9 && lng <= -87.5) {
+      if (lat >= 41.8 && lat <= 42.0 && lng >= -87.7 && lng <= -87.6) {
+        return "Downtown Chicago";
+      } else if (lat >= 41.7 && lat <= 41.9 && lng >= -87.8 && lng <= -87.6) {
+        return "North Side";
+      } else if (lat >= 41.6 && lat <= 41.8 && lng >= -87.8 && lng <= -87.6) {
+        return "South Side";
+      } else {
+        return "Chicago, IL";
+      }
+    }
+    
+    // Houston, TX area landmarks
+    if (lat >= 29.5 && lat <= 30.1 && lng >= -95.8 && lng <= -95.0) {
+      if (lat >= 29.7 && lat <= 29.8 && lng >= -95.4 && lng <= -95.3) {
+        return "Downtown Houston";
+      } else {
+        return "Houston, TX";
+      }
+    }
+    
+    // Phoenix, AZ area landmarks
+    if (lat >= 33.2 && lat <= 33.7 && lng >= -112.3 && lng <= -111.8) {
+      if (lat >= 33.4 && lat <= 33.5 && lng >= -112.1 && lng <= -112.0) {
+        return "Downtown Phoenix";
+      } else {
+        return "Phoenix, AZ";
+      }
+    }
+    
+    // Philadelphia, PA area landmarks
+    if (lat >= 39.8 && lat <= 40.1 && lng >= -75.3 && lng <= -74.9) {
+      if (lat >= 39.9 && lat <= 40.0 && lng >= -75.2 && lng <= -75.1) {
+        return "Center City Philadelphia";
+      } else {
+        return "Philadelphia, PA";
+      }
+    }
+    
+    // San Antonio, TX area landmarks
+    if (lat >= 29.2 && lat <= 29.6 && lng >= -98.7 && lng <= -98.3) {
+      if (lat >= 29.4 && lat <= 29.5 && lng >= -98.5 && lng <= -98.4) {
+        return "Downtown San Antonio";
+      } else {
+        return "San Antonio, TX";
+      }
+    }
+    
+    // San Diego, CA area landmarks
+    if (lat >= 32.5 && lat <= 32.9 && lng >= -117.3 && lng <= -117.0) {
+      if (lat >= 32.7 && lat <= 32.8 && lng >= -117.2 && lng <= -117.1) {
+        return "Downtown San Diego";
+      } else {
+        return "San Diego, CA";
+      }
+    }
+    
+    // Dallas, TX area landmarks
+    if (lat >= 32.6 && lat <= 33.0 && lng >= -97.0 && lng <= -96.6) {
+      if (lat >= 32.7 && lat <= 32.8 && lng >= -96.8 && lng <= -96.7) {
+        return "Downtown Dallas";
+      } else {
+        return "Dallas, TX";
       }
     }
     
