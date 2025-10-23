@@ -18,6 +18,23 @@ def build_incidents(evidence: List[Evidence]) -> List[Incident]:
         lng = sum(e.lng for e in cluster) / len(cluster)
 
         verdict = verify_and_score(inc_type, cluster)
+        
+        # Try to extract area information from raw data
+        area_info = None
+        for e in cluster:
+            if hasattr(e, 'raw') and e.raw and isinstance(e.raw, dict):
+                if 'area' in e.raw:
+                    area_info = e.raw['area']
+                    break
+                elif 'city' in e.raw:
+                    area_info = e.raw['city']
+                    break
+        
+        # Create summary with area information if available
+        base_summary = summary_for(inc_type, verdict)
+        if area_info:
+            base_summary = f"{base_summary} Location: {area_info}."
+        
         inc = Incident(
             id=key,
             type=inc_type,
@@ -25,7 +42,7 @@ def build_incidents(evidence: List[Evidence]) -> List[Incident]:
             lng=lng,
             confidence=verdict["confidence"],
             severity=verdict["severity"],
-            summary=summary_for(inc_type, verdict),
+            summary=base_summary,
             impact=verdict["impact"],
             why=WhyCard(**verdict["why"]),
             actions=[ActionStep(**a) for a in verdict["actions"]],
