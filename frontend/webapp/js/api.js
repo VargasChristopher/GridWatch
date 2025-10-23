@@ -204,137 +204,54 @@ class GridWatchAPI {
     const lat = incident.lat;
     const lng = incident.lng;
 
-    // Washington, DC area landmarks
-    if (lat >= 38.85 && lat <= 38.95 && lng >= -77.1 && lng <= -77.0) {
-      if (lat >= 38.89 && lat <= 38.91 && lng >= -77.05 && lng <= -77.03) {
-        return "Downtown DC";
-      } else if (
-        lat >= 38.88 &&
-        lat <= 38.92 &&
-        lng >= -77.08 &&
-        lng <= -77.04
-      ) {
-        return "Capitol Hill Area";
-      } else if (
-        lat >= 38.9 &&
-        lat <= 38.94 &&
-        lng >= -77.06 &&
-        lng <= -77.02
-      ) {
-        return "National Mall";
-      } else if (
-        lat >= 38.85 &&
-        lat <= 38.89 &&
-        lng >= -77.08 &&
-        lng <= -77.04
-      ) {
-        return "Southwest DC";
-      } else if (
-        lat >= 38.91 &&
-        lat <= 38.95 &&
-        lng >= -77.08 &&
-        lng <= -77.04
-      ) {
-        return "Northeast DC";
-      } else {
-        return "Washington, DC";
-      }
-    }
+    // City detection with more precise ranges
+    const cities = [
+      { name: "Washington, DC", latMin: 38.85, latMax: 38.95, lngMin: -77.1, lngMax: -77.0, landmarks: [
+        { name: "Downtown DC", latMin: 38.89, latMax: 38.91, lngMin: -77.05, lngMax: -77.03 },
+        { name: "Capitol Hill", latMin: 38.88, latMax: 38.92, lngMin: -77.08, lngMax: -77.04 },
+        { name: "National Mall", latMin: 38.9, latMax: 38.94, lngMin: -77.06, lngMax: -77.02 }
+      ]},
+      { name: "New York, NY", latMin: 40.6, latMax: 40.9, lngMin: -74.3, lngMax: -73.7, landmarks: [
+        { name: "Manhattan", latMin: 40.7, latMax: 40.8, lngMin: -74.0, lngMax: -73.9 },
+        { name: "Brooklyn", latMin: 40.6, latMax: 40.7, lngMin: -74.0, lngMax: -73.9 }
+      ]},
+      { name: "Los Angeles, CA", latMin: 33.7, latMax: 34.3, lngMin: -118.7, lngMax: -118.1, landmarks: [
+        { name: "Downtown LA", latMin: 34.0, latMax: 34.1, lngMin: -118.3, lngMax: -118.2 },
+        { name: "Hollywood", latMin: 34.0, latMax: 34.1, lngMin: -118.4, lngMax: -118.3 }
+      ]},
+      { name: "Seattle, WA", latMin: 47.4, latMax: 47.8, lngMin: -122.5, lngMax: -122.2, landmarks: [
+        { name: "Downtown Seattle", latMin: 47.6, latMax: 47.7, lngMin: -122.4, lngMax: -122.3 }
+      ]},
+      { name: "San Francisco, CA", latMin: 37.7, latMax: 37.9, lngMin: -122.5, lngMax: -122.3, landmarks: [
+        { name: "Downtown SF", latMin: 37.7, latMax: 37.8, lngMin: -122.5, lngMax: -122.4 }
+      ]},
+      { name: "Miami, FL", latMin: 25.6, latMax: 25.9, lngMin: -80.4, lngMax: -80.1, landmarks: [
+        { name: "South Beach", latMin: 25.7, latMax: 25.8, lngMin: -80.2, lngMax: -80.1 }
+      ]},
+      { name: "Chicago, IL", latMin: 41.6, latMax: 42.1, lngMin: -87.9, lngMax: -87.5, landmarks: [
+        { name: "Downtown Chicago", latMin: 41.8, latMax: 42.0, lngMin: -87.7, lngMax: -87.6 }
+      ]},
+      { name: "Dallas, TX", latMin: 32.6, latMax: 33.0, lngMin: -97.0, lngMax: -96.6, landmarks: [
+        { name: "Downtown Dallas", latMin: 32.7, latMax: 32.8, lngMin: -96.8, lngMax: -96.7 }
+      ]},
+      { name: "Las Vegas, NV", latMin: 36.0, latMax: 36.3, lngMin: -115.3, lngMax: -115.0, landmarks: [
+        { name: "The Strip", latMin: 36.1, latMax: 36.2, lngMin: -115.2, lngMax: -115.1 }
+      ]},
+      { name: "Denver, CO", latMin: 39.6, latMax: 39.9, lngMin: -105.2, lngMax: -104.8, landmarks: [
+        { name: "Downtown Denver", latMin: 39.7, latMax: 39.8, lngMin: -105.0, lngMax: -104.9 }
+      ]}
+    ];
 
-    // New York, NY area landmarks
-    if (lat >= 40.6 && lat <= 40.9 && lng >= -74.3 && lng <= -73.7) {
-      if (lat >= 40.7 && lat <= 40.8 && lng >= -74.0 && lng <= -73.9) {
-        return "Manhattan";
-      } else if (lat >= 40.6 && lat <= 40.7 && lng >= -74.0 && lng <= -73.9) {
-        return "Brooklyn";
-      } else if (lat >= 40.6 && lat <= 40.8 && lng >= -74.1 && lng <= -73.9) {
-        return "Queens";
-      } else if (lat >= 40.8 && lat <= 40.9 && lng >= -74.0 && lng <= -73.9) {
-        return "Bronx";
-      } else {
-        return "New York, NY";
-      }
-    }
-
-    // Los Angeles, CA area landmarks
-    if (lat >= 33.7 && lat <= 34.3 && lng >= -118.7 && lng <= -118.1) {
-      if (lat >= 34.0 && lat <= 34.1 && lng >= -118.3 && lng <= -118.2) {
-        return "Downtown LA";
-      } else if (lat >= 34.0 && lat <= 34.1 && lng >= -118.5 && lng <= -118.4) {
-        return "Beverly Hills";
-      } else if (lat >= 33.8 && lat <= 34.2 && lng >= -118.4 && lng <= -118.1) {
-        return "Hollywood";
-      } else if (lat >= 33.9 && lat <= 34.1 && lng >= -118.6 && lng <= -118.3) {
-        return "Santa Monica";
-      } else {
-        return "Los Angeles, CA";
-      }
-    }
-
-    // Chicago, IL area landmarks
-    if (lat >= 41.6 && lat <= 42.1 && lng >= -87.9 && lng <= -87.5) {
-      if (lat >= 41.8 && lat <= 42.0 && lng >= -87.7 && lng <= -87.6) {
-        return "Downtown Chicago";
-      } else if (lat >= 41.7 && lat <= 41.9 && lng >= -87.8 && lng <= -87.6) {
-        return "North Side";
-      } else if (lat >= 41.6 && lat <= 41.8 && lng >= -87.8 && lng <= -87.6) {
-        return "South Side";
-      } else {
-        return "Chicago, IL";
-      }
-    }
-
-    // Houston, TX area landmarks
-    if (lat >= 29.5 && lat <= 30.1 && lng >= -95.8 && lng <= -95.0) {
-      if (lat >= 29.7 && lat <= 29.8 && lng >= -95.4 && lng <= -95.3) {
-        return "Downtown Houston";
-      } else {
-        return "Houston, TX";
-      }
-    }
-
-    // Phoenix, AZ area landmarks
-    if (lat >= 33.2 && lat <= 33.7 && lng >= -112.3 && lng <= -111.8) {
-      if (lat >= 33.4 && lat <= 33.5 && lng >= -112.1 && lng <= -112.0) {
-        return "Downtown Phoenix";
-      } else {
-        return "Phoenix, AZ";
-      }
-    }
-
-    // Philadelphia, PA area landmarks
-    if (lat >= 39.8 && lat <= 40.1 && lng >= -75.3 && lng <= -74.9) {
-      if (lat >= 39.9 && lat <= 40.0 && lng >= -75.2 && lng <= -75.1) {
-        return "Center City Philadelphia";
-      } else {
-        return "Philadelphia, PA";
-      }
-    }
-
-    // San Antonio, TX area landmarks
-    if (lat >= 29.2 && lat <= 29.6 && lng >= -98.7 && lng <= -98.3) {
-      if (lat >= 29.4 && lat <= 29.5 && lng >= -98.5 && lng <= -98.4) {
-        return "Downtown San Antonio";
-      } else {
-        return "San Antonio, TX";
-      }
-    }
-
-    // San Diego, CA area landmarks
-    if (lat >= 32.5 && lat <= 32.9 && lng >= -117.3 && lng <= -117.0) {
-      if (lat >= 32.7 && lat <= 32.8 && lng >= -117.2 && lng <= -117.1) {
-        return "Downtown San Diego";
-      } else {
-        return "San Diego, CA";
-      }
-    }
-
-    // Dallas, TX area landmarks
-    if (lat >= 32.6 && lat <= 33.0 && lng >= -97.0 && lng <= -96.6) {
-      if (lat >= 32.7 && lat <= 32.8 && lng >= -96.8 && lng <= -96.7) {
-        return "Downtown Dallas";
-      } else {
-        return "Dallas, TX";
+    // Find the city and landmark
+    for (const city of cities) {
+      if (lat >= city.latMin && lat <= city.latMax && lng >= city.lngMin && lng <= city.lngMax) {
+        // Check for specific landmarks within the city
+        for (const landmark of city.landmarks) {
+          if (lat >= landmark.latMin && lat <= landmark.latMax && lng >= landmark.lngMin && lng <= landmark.lngMax) {
+            return landmark.name;
+          }
+        }
+        return city.name;
       }
     }
 
