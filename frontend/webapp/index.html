@@ -7,11 +7,6 @@
     <title>GridWatch</title>
     <link rel="icon" href="/favicon.ico?v=1" type="image/x-icon" sizes="any" />
     <link rel="apple-touch-icon" href="/Grid_apple.png" sizes="180x180" />
-    <link
-      rel="stylesheet"
-      href="/print.css"
-      media="print and (hover: none) and (pointer: coarse), print and (max-width: 820px)"
-    />
 
     <meta
       name="description"
@@ -753,6 +748,31 @@
         }
       }
 
+      /* Printing for small screens */
+      @media print and (max-width: 640px) {
+        /* Maintain desktop-like width */
+        .search-card {
+          width: 640px !important;
+          max-width: none !important;
+        }
+
+        /* Ensure results area maintains full height */
+        .results {
+          height: 360px !important;
+        }
+
+        /* Keep spacing consistent */
+        .app {
+          padding: 24px 20px 48px !important;
+          gap: 24px !important;
+        }
+
+        /* Maintain desktop font sizes */
+        .title-wrap h1 {
+          font-size: 34px !important;
+        }
+      }
+
       /* Keep content clear of the fixed theme toggle on small screens */
       @media (max-width: 640px) {
         .app {
@@ -771,10 +791,10 @@
       aria-label="Toggle dark mode"
       aria-pressed="false"
     >
-      <span class="sun no-print" aria-hidden="true"
+      <span class="sun" aria-hidden="true"
         ><img src="/day.png" alt="Light theme" width="20" height="20"
       /></span>
-      <span class="moon no-print" aria-hidden="true"
+      <span class="moon" aria-hidden="true"
         ><img src="/night.png" alt="Dark theme" width="20" height="20"
       /></span>
     </button>
