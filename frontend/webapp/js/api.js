@@ -206,12 +206,12 @@ class GridWatchAPI {
 
     // City detection with more precise ranges
     const cities = [
-      { name: "Washington, DC", latMin: 38.85, latMax: 38.95, lngMin: -77.1, lngMax: -77.0, landmarks: [
+      { name: "Washington, DC", latMin: 38.8, latMax: 39.0, lngMin: -77.2, lngMax: -76.9, landmarks: [
         { name: "Downtown DC", latMin: 38.89, latMax: 38.91, lngMin: -77.05, lngMax: -77.03 },
         { name: "Capitol Hill", latMin: 38.88, latMax: 38.92, lngMin: -77.08, lngMax: -77.04 },
         { name: "National Mall", latMin: 38.9, latMax: 38.94, lngMin: -77.06, lngMax: -77.02 }
       ]},
-      { name: "New York, NY", latMin: 40.6, latMax: 40.9, lngMin: -74.3, lngMax: -73.7, landmarks: [
+      { name: "New York, NY", latMin: 40.6, latMax: 40.8, lngMin: -74.1, lngMax: -73.9, landmarks: [
         { name: "Manhattan", latMin: 40.7, latMax: 40.8, lngMin: -74.0, lngMax: -73.9 },
         { name: "Brooklyn", latMin: 40.6, latMax: 40.7, lngMin: -74.0, lngMax: -73.9 }
       ]},
