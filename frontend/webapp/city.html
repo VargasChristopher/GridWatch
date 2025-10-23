@@ -870,7 +870,7 @@
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin
     ></script>
-    <script src="/js/api.js?v=7"></script>
+    <script src="/js/api.js?v=8"></script>
     <link rel="preload" as="image" href="Grid.png" type="image/png" />
     <link
       rel="apple-touch-icon"
@@ -1272,11 +1272,9 @@
           const incidents = await api.getIncidents(100); // Get more incidents to filter
           console.log("Successfully loaded incidents:", incidents.length);
           
-          // Filter incidents by current city's coordinate range
-          const cityIncidents = filterIncidentsByCity(incidents, cityName);
-          console.log("Filtered incidents for", cityName + ":", cityIncidents.length);
-          
-          return cityIncidents.map((incident) => api.transformIncident(incident));
+          // Don't filter here - let incidentsInCurrentCity handle it
+          // This avoids double filtering
+          return incidents.map((incident) => api.transformIncident(incident));
         } catch (error) {
           console.error("Failed to load incidents:", error);
           console.error("API Base URL was:", api.baseURL);
