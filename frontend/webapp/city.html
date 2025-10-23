@@ -508,6 +508,20 @@
         opacity: 1;
         transform: translateX(-50%) translateY(0);
       }
+
+      /* Style back button as primary on mobile */
+      @media (max-width: 640px) {
+        .btn.secondary#backBtn {
+          background: linear-gradient(
+            135deg,
+            var(--accent),
+            var(--accent-2)
+          ) !important;
+          color: #0b1020 !important;
+          border: none !important;
+        }
+      }
+
       /* Popover card styles */
       #subsystem-popover .card {
         margin: 8px;
@@ -892,7 +906,9 @@
           </div>
         </div>
         <div style="display: flex; gap: 8px; align-items: center">
-          <a href="/?noredirect=1" class="btn" id="backBtn">←&nbsp;Back</a>
+          <a href="/?noredirect=1" class="btn secondary" id="backBtn"
+            >←&nbsp;Back</a
+          >
           <button class="btn" id="printBtn">Print</button>
         </div>
       </header>
