@@ -870,7 +870,7 @@
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin
     ></script>
-    <script src="/js/api.js?v=8"></script>
+    <script src="/js/api.js?v=9"></script>
     <link rel="preload" as="image" href="Grid.png" type="image/png" />
     <link
       rel="apple-touch-icon"
@@ -1033,13 +1033,16 @@
           return rows;
         }
 
-        return rows.filter(incident => {
+        const filtered = rows.filter(incident => {
           const lat = incident.lat;
           const lng = incident.lng;
           return Number.isFinite(lat) && Number.isFinite(lng) &&
                  lat >= range.latMin && lat <= range.latMax && 
                  lng >= range.lngMin && lng <= range.lngMax;
         });
+        
+        console.log(`incidentsInCurrentCity: ${rows.length} -> ${filtered.length} for ${cityName}`);
+        return filtered;
       }
 
       function labelFor(id) {
