@@ -110,7 +110,7 @@ class GridWatchAPI {
    */
   async pollIncidents() {
     try {
-      const incidents = await this.getIncidents();
+      const incidents = await this.getIncidents(100); // Use same limit as initial load
       if (this.onIncidentsUpdate) {
         this.onIncidentsUpdate(incidents);
       }
