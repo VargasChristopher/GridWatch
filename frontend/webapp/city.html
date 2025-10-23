@@ -97,6 +97,10 @@
         .wrap {
           padding-top: 64px;
         }
+
+        #printBtn {
+          display: none !important;
+        }
       }
       header {
         display: flex;
@@ -783,43 +787,11 @@
         }
       }
 
-      /* Printing for small screens */
+      /* Disable printing completely on mobile devices */
       @media print and (max-width: 640px) {
-        /* Maintain desktop-like layout */
-        .wrap {
-          max-width: 1200px !important;
-          padding: 24px 20px 48px !important;
-        }
-
-        /* Keep title and header consistent */
-        h1 {
-          font-size: 32px !important;
-        }
-
-        /* Ensure map maintains good size */
-        #map {
-          height: 420px !important;
-        }
-
-        /* Keep metrics grid layout consistent */
-        .metrics {
-          grid-template-columns: repeat(2, 1fr) !important;
-        }
-
-        /* Show logo on print even on small screens */
-        .logo {
-          display: block !important;
-        }
-
-        /* Maintain proper spacing */
-        .grid {
-          gap: 14px !important;
-        }
-
-        /* Keep card styling consistent */
-        .card,
-        .stat {
-          padding: 14px !important;
+        html,
+        body {
+          display: none !important;
         }
       }
 
@@ -920,9 +892,7 @@
           </div>
         </div>
         <div style="display: flex; gap: 8px; align-items: center">
-          <a href="/?noredirect=1" class="btn secondary" id="backBtn"
-            >←&nbsp;Back</a
-          >
+          <a href="/?noredirect=1" class="btn" id="backBtn">←&nbsp;Back</a>
           <button class="btn" id="printBtn">Print</button>
         </div>
       </header>

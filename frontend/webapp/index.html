@@ -748,35 +748,18 @@
         }
       }
 
-      /* Printing for small screens */
-      @media print and (max-width: 640px) {
-        /* Maintain desktop-like width */
-        .search-card {
-          width: 640px !important;
-          max-width: none !important;
-        }
-
-        /* Ensure results area maintains full height */
-        .results {
-          height: 360px !important;
-        }
-
-        /* Keep spacing consistent */
-        .app {
-          padding: 24px 20px 48px !important;
-          gap: 24px !important;
-        }
-
-        /* Maintain desktop font sizes */
-        .title-wrap h1 {
-          font-size: 34px !important;
-        }
-      }
-
       /* Keep content clear of the fixed theme toggle on small screens */
       @media (max-width: 640px) {
         .app {
           padding-top: 64px;
+        }
+      }
+
+      /* Disable printing completely on mobile devices */
+      @media print and (max-width: 640px) {
+        html,
+        body {
+          display: none !important;
         }
       }
     </style>
