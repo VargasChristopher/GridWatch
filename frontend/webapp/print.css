@@ -1,0 +1,97 @@
+
+/* GridWatch Mobile-Only Print Styles
+   Target: devices without hover + coarse pointer (phones/tablets).
+   This avoids changing desktop print behavior.
+*/
+
+@media print and (hover: none) and (pointer: coarse) {
+  @page { size: auto; margin: 10mm; }
+
+  html, body {
+    width: auto !important;
+    height: auto !important;
+    /* Keep defaults for speed (avoid 'exact' which can slow). */
+    -webkit-print-color-adjust: auto;
+    print-color-adjust: auto;
+    color: #111;
+    font: 12pt/1.4 system-ui, -apple-system, "Segoe UI", Roboto, Inter, Arial, sans-serif;
+  }
+
+  /* Trim UI chrome that wastes space on mobile prints */
+  nav, header, footer, .topbar, .toolbar, .actions, .controls, .search,
+  .city-picker, .tabs, .filters, .pagination, .cookie-banner,
+  .btn, .button, .icon-btn, .fab, .no-print,
+  [role="toolbar"], [data-role="toolbar"] {
+    display: none !important;
+  }
+
+  /* Leaflet clean-up: hide controls/attribution only in print */
+  .leaflet-control, .leaflet-top, .leaflet-bottom, .leaflet-right,
+  .leaflet-control-container, .leaflet-bar {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  /* Keep the map but cap its size so it fits on small paper */
+  .leaflet-container, #map, .map, [data-map] {
+    height: 70mm !important;
+    max-height: 70mm !important;
+    border: 1px solid #ccc !important;
+    page-break-inside: avoid;
+    box-shadow: none !important;   /* avoid expensive effects */
+    filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Typography & layout tuned for small pages */
+  h1, .title, .page-title { font-size: 18pt !important; margin: 0 0 6mm 0 !important; font-weight: 700; }
+  h2, .h2 { font-size: 14pt !important; margin: 5mm 0 2mm !important; }
+  h3, .h3 { font-size: 12pt !important; margin: 4mm 0 2mm !important; }
+  p { margin: 0 0 3mm 0 !important; }
+
+  /* Compact KPI/summary grid */
+  .stats, .summary, .kpis {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important; /* 2 cols for phones */
+    gap: 3mm !important;
+    margin-bottom: 6mm !important;
+  }
+  .stats .card, .summary .card, .kpis .card, .stat, .kpi {
+    border: 1px solid #ddd !important;
+    border-radius: 4mm !important;
+    padding: 3mm !important;
+    box-shadow: none !important;
+  }
+
+  /* Incident cards */
+  .incident-list, .cards { margin-top: 6mm !important; }
+  .incident, .incident-card, .card {
+    border: 1px solid #ddd !important;
+    border-radius: 3mm !important;
+    padding: 3mm !important;
+    margin: 0 0 3mm 0 !important;
+    page-break-inside: avoid !important;
+    box-shadow: none !important;
+  }
+  .incident h3, .incident .title, .incident-card h3 { margin: 0 0 2mm !important; }
+  .eta, .badge { font-weight: 600 !important; }
+
+  /* Avoid big background images to keep print fast */
+  * {
+    background-image: none !important;
+  }
+
+  /* Print URL/timestamp helper (add .print-url element where you want it) */
+  .print-url {
+    display: block !important;
+    font-size: 8pt !important;
+    color: #666 !important;
+    margin-top: 6mm !important;
+    word-break: break-all !important;
+  }
+}
+
+/* Extra guard: if a UA doesn't support hover/pointer queries, fall back to width check. */
+@media print and (max-width: 820px) {
+  /* Keep this minimal to avoid affecting desktop print dialogs that emulate small widths */
+}
