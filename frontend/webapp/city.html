@@ -870,7 +870,7 @@
       integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
       crossorigin
     ></script>
-    <script src="/js/api.js?v=5"></script>
+    <script src="/js/api.js?v=6"></script>
     <link rel="preload" as="image" href="Grid.png" type="image/png" />
     <link
       rel="apple-touch-icon"
@@ -1229,12 +1229,46 @@
       );
       console.log("API Base URL:", api.baseURL);
 
+      // City coordinate ranges for filtering
+      const cityRanges = {
+        "Washington, DC": { latMin: 38.8, latMax: 39.0, lngMin: -77.2, lngMax: -76.9 },
+        "New York, NY": { latMin: 40.6, latMax: 40.8, lngMin: -74.1, lngMax: -73.9 },
+        "Los Angeles, CA": { latMin: 33.7, latMax: 34.3, lngMin: -118.7, lngMax: -118.1 },
+        "Seattle, WA": { latMin: 47.4, latMax: 47.8, lngMin: -122.5, lngMax: -122.2 },
+        "San Francisco, CA": { latMin: 37.7, latMax: 37.9, lngMin: -122.5, lngMax: -122.3 },
+        "Miami, FL": { latMin: 25.6, latMax: 25.9, lngMin: -80.4, lngMax: -80.1 },
+        "Chicago, IL": { latMin: 41.6, latMax: 42.1, lngMin: -87.9, lngMax: -87.5 },
+        "Dallas, TX": { latMin: 32.6, latMax: 33.0, lngMin: -97.0, lngMax: -96.6 },
+        "Las Vegas, NV": { latMin: 36.0, latMax: 36.3, lngMin: -115.3, lngMax: -115.0 },
+        "Denver, CO": { latMin: 39.6, latMax: 39.9, lngMin: -105.2, lngMax: -104.8 }
+      };
+
+      function filterIncidentsByCity(incidents, cityName) {
+        const range = cityRanges[cityName];
+        if (!range) {
+          console.warn("No coordinate range found for city:", cityName);
+          return incidents;
+        }
+
+        return incidents.filter(incident => {
+          const lat = incident.lat;
+          const lng = incident.lng;
+          return lat >= range.latMin && lat <= range.latMax && 
+                 lng >= range.lngMin && lng <= range.lngMax;
+        });
+      }
+
       async function loadRealIncidents() {
         try {
           console.log("Attempting to load incidents from:", api.baseURL);
-          const incidents = await api.getIncidents();
+          const incidents = await api.getIncidents(100); // Get more incidents to filter
           console.log("Successfully loaded incidents:", incidents.length);
-          return incidents.map((incident) => api.transformIncident(incident));
+          
+          // Filter incidents by current city's coordinate range
+          const cityIncidents = filterIncidentsByCity(incidents, cityName);
+          console.log("Filtered incidents for", cityName + ":", cityIncidents.length);
+          
+          return cityIncidents.map((incident) => api.transformIncident(incident));
         } catch (error) {
           console.error("Failed to load incidents:", error);
           console.error("API Base URL was:", api.baseURL);
