@@ -191,7 +191,7 @@
       }
       .metrics {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(2, 1fr);
         gap: 12px;
       }
       @media (max-width: 700px) {
@@ -853,12 +853,8 @@
 
             <div class="metrics">
               <div class="stat">
-                <div class="k" id="m-outages">0</div>
-                <div class="t">Active utility outages</div>
-              </div>
-              <div class="stat">
                 <div class="k" id="m-incidents">0</div>
-                <div class="t">Incidents today</div>
+                <div class="t" id="incidents-text">Incident(s) today</div>
               </div>
               <div class="stat">
                 <div class="k" id="m-avgEta">–</div>
@@ -1245,11 +1241,9 @@
         empty.style.display = rows.length ? "none" : "block";
         $("#incidentsBadge").textContent = `${rows.length} open`;
         $("#m-incidents").textContent = rows.length.toString();
-        $("#m-outages").textContent = rows
-          .filter(
-            (r) => r.cat === "outage" || /outage|fiber/i.test(r.title || r.t)
-          )
-          .length.toString();
+        $("#incidents-text").textContent = activeFilter
+          ? `${labelFor(activeFilter)} incident(s) today`
+          : "Incident(s) today";
         $("#m-avgEta").textContent = approxAvgEta(rows);
       }
 
