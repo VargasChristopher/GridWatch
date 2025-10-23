@@ -113,13 +113,26 @@
         width: 40px;
         height: 40px;
         border-radius: 10px;
-        box-shadow: var(--shadow);
         /* Show the provided grid image inside the same 40×40 square */
         background-image: url("/Grid.png");
         background-size: cover; /* fill the square, crop overflow */
         background-position: center; /* center the image */
         background-repeat: no-repeat;
         display: block;
+      }
+
+      /* Theme override - ensure logo matches chosen theme */
+      :root[data-theme="dark"] .logo {
+        background-image: url("/Grid.png");
+      }
+      :root[data-theme="light"] .logo {
+        background-image: url("/Grid_black.png");
+      }
+      /* Hide logo on mobile/small screens */
+      @media (max-width: 640px) {
+        .logo {
+          display: none;
+        }
       }
 
       h1 {
@@ -145,12 +158,15 @@
         color: #0b1020;
         box-shadow: var(--shadow);
         text-decoration: none;
+        height: 36px;
+        line-height: 20px;
       }
       .btn.secondary {
         background: transparent !important;
         color: var(--btn-secondary-fg) !important;
         border: 1px solid var(--border);
       }
+
       .btn:focus {
         outline: none;
         box-shadow: 0 0 0 3px rgba(122, 168, 255, 0.35);
@@ -404,7 +420,13 @@
         left: 50%;
         transform: translateX(-50%);
         bottom: calc(18px + env(safe-area-inset-bottom));
-        width: min(75vw, 400px);
+        width: min(50vw, 300px);
+      }
+      /* Wider dock on mobile for better touch targets */
+      @media (max-width: 768px) {
+        #dock {
+          width: min(75vw, 400px);
+        }
       }
 
       /* make the corners truly rounded and clip the blur */
@@ -435,9 +457,9 @@
       }
 
       .dock-item {
-        width: 56px;
-        height: 56px;
-        border-radius: 12px;
+        width: 45px;
+        height: 45px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -447,8 +469,8 @@
           box-shadow 160ms ease;
       }
       .dock-item img {
-        width: 36px;
-        height: 36px;
+        width: 28px;
+        height: 28px;
         display: block;
         pointer-events: none;
       }
@@ -711,6 +733,12 @@
       .theme-toggle .moon {
         display: none;
       }
+      .theme-toggle img {
+        display: block;
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+      }
       html[data-theme="dark"] .theme-toggle .sun {
         display: none;
       }
@@ -795,6 +823,14 @@
       html {
         background-color: var(--bg);
       }
+
+      /* Keep Back button on one line on small screens */
+      @media (max-width: 640px) {
+        #backBtn {
+          white-space: nowrap; /* don’t wrap text */
+          flex-shrink: 0; /* don’t compress the button inside the header flex row */
+        }
+      }
     </style>
     <link
       rel="stylesheet"
@@ -825,8 +861,12 @@
       aria-label="Toggle dark mode"
       aria-pressed="false"
     >
-      <span class="sun" aria-hidden="true">☀️</span>
-      <span class="moon" aria-hidden="true">🌙</span>
+      <span class="sun" aria-hidden="true"
+        ><img src="/day.png" alt="Light theme" width="20" height="20"
+      /></span>
+      <span class="moon" aria-hidden="true"
+        ><img src="/night.png" alt="Dark theme" width="20" height="20"
+      /></span>
     </button>
 
     <div class="wrap">
@@ -839,8 +879,10 @@
           </div>
         </div>
         <div style="display: flex; gap: 8px; align-items: center">
-          <a href="/?noredirect=1" class="btn secondary" id="backBtn">← Back</a>
-          <button class="btn" id="printBtn">Print report</button>
+          <a href="/?noredirect=1" class="btn secondary" id="backBtn"
+            >←&nbsp;Back</a
+          >
+          <button class="btn" id="printBtn">Print</button>
         </div>
       </header>
 
@@ -1275,7 +1317,11 @@
         {
           id: "outage",
           label: "Outage",
-          icon: "⚡",
+          icon: `<img src="${
+            document.documentElement.dataset.theme === "dark"
+              ? "/outage.png"
+              : "/outage_black.png"
+          }" alt="Outage icon">`,
           items: [
             { label: "Power", value: "2 outages", variant: "sev-med" },
             { label: "Internet", value: "1 outage", variant: "sev-med" },
@@ -1285,7 +1331,11 @@
         {
           id: "traffic",
           label: "Traffic",
-          icon: "🚦",
+          icon: `<img src="${
+            document.documentElement.dataset.theme === "dark"
+              ? "/traffic.png"
+              : "/traffic_black.png"
+          }" alt="Traffic icon">`,
           items: [
             { label: "Avg. speed (citywide)", value: "27 mph" },
             { label: "Major incidents", value: "1", variant: "sev-med" },
@@ -1295,7 +1345,11 @@
         {
           id: "crime",
           label: "Crime",
-          icon: "🚓",
+          icon: `<img src="${
+            document.documentElement.dataset.theme === "dark"
+              ? "/crime.png"
+              : "/crime_black.png"
+          }" alt="Crime icon">`,
           items: [
             { label: "Active alerts", value: "3", variant: "sev-med" },
             { label: "New reports (24h)", value: "12" },
@@ -1304,7 +1358,11 @@
         {
           id: "environment",
           label: "Environment",
-          icon: "🌳",
+          icon: `<img src="${
+            document.documentElement.dataset.theme === "dark"
+              ? "/environment.png"
+              : "/environment_black.png"
+          }" alt="Environment icon">`,
           items: [
             { label: "Air quality (AQI)", value: "42" },
             { label: "Flood alerts", value: "None", variant: "sev-low" },
@@ -1313,7 +1371,11 @@
         {
           id: "emergency",
           label: "Emergency",
-          icon: "🚑",
+          icon: `<img src="${
+            document.documentElement.dataset.theme === "dark"
+              ? "/emergency.png"
+              : "/emergency_black.png"
+          }" alt="Emergency icon">`,
           items: [
             { label: "Active incidents", value: "3", variant: "sev-med" },
             { label: "Avg response time", value: "7 min" },
@@ -1645,6 +1707,15 @@
           const m = document.querySelector('meta[name="color-scheme"]');
           if (m) m.content = theme === "dark" ? "dark light" : "light dark";
           btn.setAttribute("aria-pressed", String(theme === "dark"));
+
+          // Update subsystem icons based on theme
+          SUBSYSTEMS.forEach((s) => {
+            s.icon = `<img src="${
+              theme === "dark" ? `/${s.id}.png` : `/${s.id}_black.png`
+            }" alt="${s.label} icon">`;
+          });
+          // Re-render the dock to show updated icons
+          renderDock();
         }
 
         btn.addEventListener("click", () => {

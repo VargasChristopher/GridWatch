@@ -115,13 +115,20 @@
         width: 40px;
         height: 40px;
         border-radius: 10px;
-        box-shadow: var(--shadow);
         /* Show the provided grid image inside the same 40×40 square */
         background-image: url("/Grid.png");
         background-size: cover; /* fill the square, crop overflow */
         background-position: center; /* center the image */
         background-repeat: no-repeat;
         display: block;
+      }
+
+      /* Theme override - ensure logo matches chosen theme */
+      :root[data-theme="dark"] .logo {
+        background-image: url("/Grid.png");
+      }
+      :root[data-theme="light"] .logo {
+        background-image: url("/Grid_black.png");
       }
 
       .title-wrap h1 {
@@ -690,6 +697,12 @@
       .theme-toggle .moon {
         display: none;
       }
+      .theme-toggle img {
+        display: block;
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+      }
       html[data-theme="dark"] .theme-toggle .sun {
         display: none;
       }
@@ -746,8 +759,12 @@
       aria-label="Toggle dark mode"
       aria-pressed="false"
     >
-      <span class="sun" aria-hidden="true">☀️</span>
-      <span class="moon" aria-hidden="true">🌙</span>
+      <span class="sun" aria-hidden="true"
+        ><img src="/day.png" alt="Light theme" width="20" height="20"
+      /></span>
+      <span class="moon" aria-hidden="true"
+        ><img src="/night.png" alt="Dark theme" width="20" height="20"
+      /></span>
     </button>
 
     <div class="app" id="app">
