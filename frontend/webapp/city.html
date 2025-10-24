@@ -851,11 +851,14 @@
         background-color: var(--bg);
       }
 
-      /* Keep Back button on one line on small screens */
       @media (max-width: 640px) {
         #backBtn {
           white-space: nowrap; /* don’t wrap text */
           flex-shrink: 0; /* don’t compress the button inside the header flex row */
+        }
+
+        #incidentsBadge {
+          margin-left: 6px; /* extra padding if they end up adjacent */
         }
       }
     </style>
@@ -923,7 +926,7 @@
             <div class="metrics">
               <div class="stat">
                 <div class="k" id="m-incidents">0</div>
-                <div class="t" id="incidents-text">Incident(s) today</div>
+                <div class="t" id="incidents-text">Incidents</div>
               </div>
               <div class="stat">
                 <div class="k" id="m-avgEta">–</div>
@@ -1013,7 +1016,8 @@
     <script>
       const incidentMarkers = [];
       let allIncidents = [];
-      let activeFilter = null;
+      let activeFilters = new Set();
+      let suppressReRenderUntil = 0;
       const FILTERABLE_IDS = new Set([
         "outage",
         "traffic",
@@ -1025,7 +1029,7 @@
       // Keep only incidents that fall inside the current city's coordinate range
       function incidentsInCurrentCity(rows) {
         if (!rows || !cityName) return rows || [];
-        
+
         // Use our coordinate ranges instead of map bounds
         const range = cityRanges[cityName];
         if (!range) {
@@ -1033,15 +1037,22 @@
           return rows;
         }
 
-        const filtered = rows.filter(incident => {
+        const filtered = rows.filter((incident) => {
           const lat = incident.lat;
           const lng = incident.lng;
-          return Number.isFinite(lat) && Number.isFinite(lng) &&
-                 lat >= range.latMin && lat <= range.latMax && 
-                 lng >= range.lngMin && lng <= range.lngMax;
+          return (
+            Number.isFinite(lat) &&
+            Number.isFinite(lng) &&
+            lat >= range.latMin &&
+            lat <= range.latMax &&
+            lng >= range.lngMin &&
+            lng <= range.lngMax
+          );
         });
-        
-        console.log(`incidentsInCurrentCity: ${rows.length} -> ${filtered.length} for ${cityName}`);
+
+        console.log(
+          `incidentsInCurrentCity: ${rows.length} -> ${filtered.length} for ${cityName}`
+        );
         return filtered;
       }
 
@@ -1108,19 +1119,44 @@
 
       function setActiveFilter(id) {
         if (!FILTERABLE_IDS.has(id)) return; // ignore non-filter dock items
-        activeFilter = activeFilter === id ? null : id; // toggle on/off
+
+        // If this click would result in all filters being selected, or if it's already all selected,
+        // clear all filters instead
+        if (
+          !activeFilters.has(id) &&
+          activeFilters.size === FILTERABLE_IDS.size - 1
+        ) {
+          // This would complete the set, so clear instead
+          activeFilters.clear();
+        } else {
+          // Normal toggle behavior
+          if (activeFilters.has(id)) {
+            activeFilters.delete(id);
+          } else {
+            activeFilters.add(id);
+          }
+        }
+
+        // Update visual state for all dock items
         document
           .querySelectorAll("#dockInner .dock-item")
           .forEach((d) =>
-            d.classList.toggle("active", d.dataset.id === activeFilter)
+            d.classList.toggle("active", activeFilters.has(d.dataset.id))
           );
+
         if (Array.isArray(allIncidents)) renderIncidents(allIncidents); // re-render using wrapper below
       }
 
       function updateIncidentsUIExtras(rows) {
         const badge = document.getElementById("incidentsBadge");
         if (badge) {
-          const suffix = activeFilter ? " • " + labelFor(activeFilter) : "";
+          let suffix = "";
+          if (activeFilters.size > 0) {
+            const filterLabels = Array.from(activeFilters).map((f) =>
+              labelFor(f)
+            );
+            suffix = " • " + filterLabels.join(" + ");
+          }
           badge.textContent = `${rows.length} open${suffix}`;
         }
       }
@@ -1242,16 +1278,66 @@
 
       // City coordinate ranges for filtering
       const cityRanges = {
-        "Washington, DC": { latMin: 38.8, latMax: 39.0, lngMin: -77.2, lngMax: -76.9 },
-        "New York, NY": { latMin: 40.6, latMax: 40.8, lngMin: -74.1, lngMax: -73.9 },
-        "Los Angeles, CA": { latMin: 33.7, latMax: 34.3, lngMin: -118.7, lngMax: -118.1 },
-        "Seattle, WA": { latMin: 47.4, latMax: 47.8, lngMin: -122.5, lngMax: -122.2 },
-        "San Francisco, CA": { latMin: 37.7, latMax: 37.9, lngMin: -122.5, lngMax: -122.3 },
-        "Miami, FL": { latMin: 25.6, latMax: 25.9, lngMin: -80.4, lngMax: -80.1 },
-        "Chicago, IL": { latMin: 41.6, latMax: 42.1, lngMin: -87.9, lngMax: -87.5 },
-        "Dallas, TX": { latMin: 32.6, latMax: 33.0, lngMin: -97.0, lngMax: -96.6 },
-        "Las Vegas, NV": { latMin: 36.0, latMax: 36.3, lngMin: -115.3, lngMax: -115.0 },
-        "Denver, CO": { latMin: 39.6, latMax: 39.9, lngMin: -105.2, lngMax: -104.8 }
+        "Washington, DC": {
+          latMin: 38.8,
+          latMax: 39.0,
+          lngMin: -77.2,
+          lngMax: -76.9,
+        },
+        "New York, NY": {
+          latMin: 40.6,
+          latMax: 40.8,
+          lngMin: -74.1,
+          lngMax: -73.9,
+        },
+        "Los Angeles, CA": {
+          latMin: 33.7,
+          latMax: 34.3,
+          lngMin: -118.7,
+          lngMax: -118.1,
+        },
+        "Seattle, WA": {
+          latMin: 47.4,
+          latMax: 47.8,
+          lngMin: -122.5,
+          lngMax: -122.2,
+        },
+        "San Francisco, CA": {
+          latMin: 37.7,
+          latMax: 37.9,
+          lngMin: -122.5,
+          lngMax: -122.3,
+        },
+        "Miami, FL": {
+          latMin: 25.6,
+          latMax: 25.9,
+          lngMin: -80.4,
+          lngMax: -80.1,
+        },
+        "Chicago, IL": {
+          latMin: 41.6,
+          latMax: 42.1,
+          lngMin: -87.9,
+          lngMax: -87.5,
+        },
+        "Dallas, TX": {
+          latMin: 32.6,
+          latMax: 33.0,
+          lngMin: -97.0,
+          lngMax: -96.6,
+        },
+        "Las Vegas, NV": {
+          latMin: 36.0,
+          latMax: 36.3,
+          lngMin: -115.3,
+          lngMax: -115.0,
+        },
+        "Denver, CO": {
+          latMin: 39.6,
+          latMax: 39.9,
+          lngMin: -105.2,
+          lngMax: -104.8,
+        },
       };
 
       function filterIncidentsByCity(incidents, cityName) {
@@ -1261,11 +1347,15 @@
           return incidents;
         }
 
-        return incidents.filter(incident => {
+        return incidents.filter((incident) => {
           const lat = incident.lat;
           const lng = incident.lng;
-          return lat >= range.latMin && lat <= range.latMax && 
-                 lng >= range.lngMin && lng <= range.lngMax;
+          return (
+            lat >= range.latMin &&
+            lat <= range.latMax &&
+            lng >= range.lngMin &&
+            lng <= range.lngMax
+          );
         });
       }
 
@@ -1274,7 +1364,7 @@
           console.log("Attempting to load incidents from:", api.baseURL);
           const incidents = await api.getIncidents(100); // Get more incidents to filter
           console.log("Successfully loaded incidents:", incidents.length);
-          
+
           // Don't filter here - let incidentsInCurrentCity handle it
           // This avoids double filtering
           return incidents.map((incident) => api.transformIncident(incident));
@@ -1353,9 +1443,11 @@
         empty.style.display = rows.length ? "none" : "block";
         $("#incidentsBadge").textContent = `${rows.length} open`;
         $("#m-incidents").textContent = rows.length.toString();
-        $("#incidents-text").textContent = activeFilter
-          ? `${labelFor(activeFilter)} incident(s) today`
-          : "Incident(s) today";
+        const incidentText = rows.length === 1 ? "Incident" : "Incidents";
+        $("#incidents-text").textContent =
+          activeFilters.size > 0
+            ? `Filtered ${incidentText.toLowerCase()}`
+            : incidentText;
         $("#m-avgEta").textContent = approxAvgEta(rows);
       }
 
@@ -1628,6 +1720,7 @@
       function pingIncident(i) {
         const m = incidentMarkers[i];
         if (!m) return;
+        suppressReRenderUntil = Date.now() + 3500;
         const ll = m.getLatLng();
         map.flyTo(ll, Math.max(map.getZoom(), 13), { duration: 0.6 }); // smooth focus
         m.openPopup();
@@ -1653,10 +1746,11 @@
               : r
           );
 
-          // 3) apply the dock/category filter (traffic, outage, etc.)
-          const toShow = activeFilter
-            ? allIncidents.filter((r) => r && r.cat === activeFilter)
-            : allIncidents;
+          // 3) apply the dock/category filters (traffic, outage, etc.)
+          const toShow =
+            activeFilters.size > 0
+              ? allIncidents.filter((r) => r && activeFilters.has(r.cat))
+              : allIncidents;
 
           // 4) draw list + map markers only for the filtered set
           _renderIncidents(toShow);
@@ -1724,6 +1818,7 @@
           }).addTo(map);
 
           map.on("moveend zoomend", () => {
+            if (Date.now() < suppressReRenderUntil) return; // don't rebuild markers yet
             if (Array.isArray(allIncidents) && allIncidents.length) {
               renderIncidents(allIncidents);
             }
