@@ -861,6 +861,23 @@
           margin-left: 6px; /* extra padding if they end up adjacent */
         }
       }
+
+      #clearFiltersBtn {
+        width: auto; /* shrink to content */
+        min-width: 140px; /* keeps it from getting too small */
+        padding: 8px 12px;
+        font-size: 0.9rem;
+        align-self: center; /* centers the button in the dock column */
+        display: inline-flex; /* ensures perfect text centering */
+        justify-content: center; /* centers text horizontally */
+        text-align: center; /* fallback centering */
+      }
+
+      /* Subtle disabled state for clarity */
+      .btn.secondary:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
     </style>
     <link
       rel="stylesheet"
@@ -993,10 +1010,10 @@
             id="dockInner"
             style="
               display: flex;
-              justify-content: center;
-              gap: 18px;
-              align-items: flex-end;
-              padding: 10px 18px;
+              flex-direction: column; /* put clear button on top, icons below */
+              align-items: stretch; /* let the button go full width */
+              gap: 10px; /* space between button and icon row */
+              padding: 12px 18px 14px; /* slightly taller dock */
               border-radius: 24px;
               background: linear-gradient(
                 180deg,
@@ -1145,6 +1162,8 @@
           );
 
         if (Array.isArray(allIncidents)) renderIncidents(allIncidents); // re-render using wrapper below
+
+        syncClearButtonState();
       }
 
       function updateIncidentsUIExtras(rows) {
@@ -1159,6 +1178,8 @@
           }
           badge.textContent = `${rows.length} open${suffix}`;
         }
+
+        syncClearButtonState();
       }
 
       // ===== Helpers =====
@@ -1569,22 +1590,72 @@
         return el;
       }
 
+      function clearFilters() {
+        activeFilters.clear();
+        // remove highlight from all dock items
+        document
+          .querySelectorAll("#dockInner .dock-item")
+          .forEach((d) => d.classList.remove("active"));
+
+        // re-render with no filters
+        if (Array.isArray(allIncidents)) renderIncidents(allIncidents);
+
+        // optional: close any open popover
+        try {
+          closePopover();
+        } catch {}
+      }
+
+      function syncClearButtonState() {
+        const btn = document.getElementById("clearFiltersBtn");
+        if (btn) btn.disabled = activeFilters.size === 0;
+      }
+
       function renderDock() {
         const container =
           document.getElementById("dockInner") ||
           document.querySelector("#dockInner");
+
         if (!container) {
-          // If the DOM isn't ready for some reason, try again after DOMContentLoaded
           document.addEventListener("DOMContentLoaded", function onReady() {
             document.removeEventListener("DOMContentLoaded", onReady);
             renderDock();
           });
           return;
         }
+
+        // Clear and rebuild
         container.innerHTML = "";
-        SUBSYSTEMS.forEach(function (s) {
-          container.appendChild(makeDockItem(s));
-        });
+
+        // 1) Clear Filters (secondary) button at the top
+        const clear = document.createElement("button");
+        clear.id = "clearFiltersBtn";
+        clear.type = "button";
+        clear.className = "btn secondary";
+        clear.textContent = "Clear filters";
+        clear.addEventListener("click", clearFilters);
+        container.appendChild(clear);
+
+        // 2) Row that holds the dock icons
+        const row = document.createElement("div");
+        row.id = "dockRow";
+        row.style.display = "flex";
+        row.style.justifyContent = "center";
+        row.style.gap = "18px";
+        row.style.alignItems = "flex-end";
+        container.appendChild(row);
+
+        // 3) Add the dock items
+        SUBSYSTEMS.forEach((s) => row.appendChild(makeDockItem(s)));
+
+        // Restore active highlights (if any) and button state
+        container
+          .querySelectorAll(".dock-item")
+          .forEach((d) =>
+            d.classList.toggle("active", activeFilters.has(d.dataset.id))
+          );
+
+        syncClearButtonState();
       }
 
       function openPopover(id) {
@@ -1880,6 +1951,13 @@
           });
           // Re-render the dock to show updated icons
           renderDock();
+
+          // Restore active filter highlights
+          document
+            .querySelectorAll("#dockInner .dock-item")
+            .forEach((d) =>
+              d.classList.toggle("active", activeFilters.has(d.dataset.id))
+            );
         }
 
         btn.addEventListener("click", () => {
